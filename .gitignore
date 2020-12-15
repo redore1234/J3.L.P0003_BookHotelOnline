@@ -1,0 +1,19 @@
+
+# Created by https://www.toptal.com/developers/gitignore/api/java-web,netbeans
+# Edit at https://www.toptal.com/developers/gitignore?templates=java-web,netbeans
+
+### Java-Web ###
+## ignoring target file
+target/
+
+### NetBeans ###
+**/nbproject/private/
+**/nbproject/Makefile-*.mk
+**/nbproject/Package-*.bash
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# End of https://www.toptal.com/developers/gitignore/api/java-web,netbeans

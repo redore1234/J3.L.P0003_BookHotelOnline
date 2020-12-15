@@ -1,0 +1,14 @@
+login=login.jsp
+invalid=invalid.html
+homepage=home.jsp
+register=register.html
+registerpage=register.jsp
+Login=LoginServlet
+LoginGoogle=LoginGoogleServlet
+Logout=LogoutServlet
+Home=HomeServlet
+RegisterNewAccount=RegisterNewAccountServlet
+LoadImage=LoadImageServlet
+SearchRoomType=SearchRoomTypeServlet
+ViewCart= ViewCartServlet
+ViewHistory=ViewHistoryServlet

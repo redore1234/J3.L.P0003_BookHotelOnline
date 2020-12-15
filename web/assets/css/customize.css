@@ -1,0 +1,29 @@
+html, body{
+    height: 100vh;
+}
+
+.navbar-brand{
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.nav-link{
+    font-size: 15px;
+}
+
+.welcome-user{
+    font-weight: bold;
+    color: white;
+}
+
+.active{
+    font-weight: bold;
+}
+
+.bg-custom{
+    background-image: linear-gradient(to bottom right, rgb(255, 208, 0),  rgb(255, 229, 111) ,rgb(255, 102, 0));
+}
+
+.card-footer{
+    background-color: white !important;
+}

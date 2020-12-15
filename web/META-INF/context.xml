@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/J3.L.P0003_BookHotelOnline" allowCasualMultipartParsing="true">
+    <Resource name="BookHotel" type="javax.sql.DataSource" auth="Container"
+            driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+            url="jdbc:sqlserver://localhost:1433;databaseName=J3LP0003"
+            username="sa"  password="123456"
+    />
+</Context>
