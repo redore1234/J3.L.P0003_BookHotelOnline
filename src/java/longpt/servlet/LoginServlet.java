@@ -8,7 +8,10 @@ package longpt.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.Map;
 import javax.naming.NamingException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -58,7 +61,7 @@ public class LoginServlet extends HttpServlet {
                 //Verify Recaptcha
                 loginSuccessful = ReCaptchaVerify.verify(gRecaptchaResponse);
                 if (loginSuccessful == false) {
-                    request.setAttribute("CAPTCHA_ERROR", "Captcha invalid!");
+                    request.setAttribute("CAPTCHA_ERROR", "INVALID CAPTCHA");
                     url = LOGIN_PAGE;
                 } else {
                     //Check status in DB
@@ -88,7 +91,15 @@ public class LoginServlet extends HttpServlet {
             //logger.error("LoginServlet _ NamingException: " + ex.getMessage());
             log("LoginServlet _ NamingException: " + ex.getMessage());
         } finally {
-            response.sendRedirect(url);
+            if (loginSuccessful == true) {
+                response.sendRedirect(url);
+            } else {
+                ServletContext context = request.getServletContext();
+                Map<String, String> listMap = (Map<String, String>) context.getAttribute("MAP");
+
+                RequestDispatcher rd = request.getRequestDispatcher(listMap.get(url));
+                rd.forward(request, response);
+            }
             out.close();
         }
     }

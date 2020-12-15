@@ -26,6 +26,23 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="Home">Home</a>
                     </li>
+                    <c:if test="${role eq 'user'}">  
+                        <!-- View Cart form -->
+                        <c:url var="urlViewCart" value="ViewCart">
+                            <c:param name="btnAction" value="View Cart"/>
+                        </c:url>
+                        <li class="nav-item">
+                            <a href="${urlViewCart}" class="nav-link active">View Cart</a>
+                        </li>
+
+                        <!-- Load Order Form -->
+                        <c:url var="urlViewHistory" value="ViewHistory">
+                            <c:param name="btnAction" value="View History"/>
+                        </c:url>
+                        <li class="nav-item">
+                            <a href="${urlViewHistory}" class="nav-link active">Purchase History</a>
+                        </li>
+                    </c:if>
                     <!-- Reload Page -->
                     <li class="nav-item">
                         <c:url var="urlReload" value="Home">
@@ -74,7 +91,73 @@
         </nav>
 
         <div class="container">
-            
+            <c:set var="cart" value="${sessionScope.CART}"/>
+            <!-- CART FORM -->
+            <c:choose>
+                <c:when test="${not empty cart}">
+                    <h4 class="card-header text-center" style="font-weight: bold">YOUR CART</h4>
+                    <c:set var="compartment" value="${cart.compartment}"/>
+                    <c:if test="${not empty compartment}">
+                        <!-- Display cart -->
+                        <table class="table table-hover">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Room ID</th>
+                                    <th>Type ID</th>
+                                    <th>Price</th>
+                                    <th>Delete</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="room" items="${compartment}" varStatus="counter">
+                                    <c:set var="roomItem" value="${room.value}"/>
+                                <form action="CheckOut">
+                                    <input type="hidden" name="roomId" value="${roomItem.roomId}" />
+                                    <tr>
+                                        <td>${counter.count}</td>
+                                        <td>${roomItem.roomId}</td>
+                                        <td>${roomItem.typeId}</td>
+                                        <td>${roomItem.price}</td>
+
+                                        <c:choose>
+                                            <c:when test="${role eq 'user'}">
+                                                <!--<td>
+                                                    <input type="submit" value="Update quantity" class="btn btn-warning" name="btnAction"/>
+                                                </td>-->
+                                                <td>
+                                                    <a href="DeleteRoomFromCart?btnAction=Delete Cart&txtRoomId=${room.value.roomId}" class="btn btn-outline-danger" 
+                                                       onclick="return confirm('Do you want to delete this?');">
+                                                        Delete
+                                                    </a>
+                                                </td>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <c:redirect url="Home"/>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </tr>
+                                </form>
+                            </c:forEach>
+                            <c:set var="totalPrice" value="${sessionScope.TOTAL_PRICE}"/>
+                            <tr class="alert-primary" style="font-weight: bold">
+                                <td scope="row" colspan="4">Total Price:</td>
+                                <td scope="row">${totalPrice} VND</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </c:if>
+                </c:when>
+                <c:otherwise>
+                    <div class="container h-100">
+                        <div class="row h-100  justify-content-center">
+                            <div class="col-6 text-center">
+                                <h2 class="text-danger">Your cart is empty</h2>
+                            </div>
+                        </div>
+                    </div>
+                </c:otherwise>
+            </c:choose>
         </div>
         <script src="assets/js/bootstrap.min.js"></script>
     </body>

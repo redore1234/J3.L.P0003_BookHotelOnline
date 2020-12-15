@@ -3,31 +3,30 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package longpt.tblroom;
+package longpt.cart;
 
 import java.io.Serializable;
+import java.sql.Date;
 
 /**
  *
  * @author phamt
  */
-public class tblRoomDTO implements Serializable {
+public class RoomItem implements Serializable {
 
     private int roomId;
     private String typeId;
-    private String image;
     private double price;
-    private int statusId;
+    private Date checkinDate;
+    private Date checkoutDate;
 
-    public tblRoomDTO() {
+    public RoomItem() {
     }
 
-    public tblRoomDTO(int roomId, String typeId, String image, double price, int statusId) {
+    public RoomItem(int roomId, String typeId, double price) {
         this.roomId = roomId;
         this.typeId = typeId;
-        this.image = image;
         this.price = price;
-        this.statusId = statusId;
     }
 
     public int getRoomId() {
@@ -46,14 +45,6 @@ public class tblRoomDTO implements Serializable {
         this.typeId = typeId;
     }
 
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
     public double getPrice() {
         return price;
     }
@@ -62,12 +53,19 @@ public class tblRoomDTO implements Serializable {
         this.price = price;
     }
 
-    public int getStatusId() {
-        return statusId;
+    public Date getCheckinDate() {
+        return checkinDate;
     }
 
-    public void setStatusId(int statusId) {
-        this.statusId = statusId;
+    public void setCheckinDate(Date checkinDate) {
+        this.checkinDate = checkinDate;
     }
 
+    public Date getCheckoutDate() {
+        return checkoutDate;
+    }
+
+    public void setCheckoutDate(Date checkoutDate) {
+        this.checkoutDate = checkoutDate;
+    }
 }

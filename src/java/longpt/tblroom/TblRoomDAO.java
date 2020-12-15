@@ -5,6 +5,7 @@
  */
 package longpt.tblroom;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,9 +22,9 @@ import longpt.dbulti.DbHelpers;
  */
 public class TblRoomDAO implements Serializable{
     
-    private List<tblRoomDTO> listRoom;
+    private List<TblRoomDTO> listRoom;
 
-    public List<tblRoomDTO> getListRoom() {
+    public List<TblRoomDTO> getListRoom() {
         return listRoom;
     }
     
@@ -35,9 +36,8 @@ public class TblRoomDAO implements Serializable{
         try {
             con = DbHelpers.makeConnection();
             if (con != null) {
-                String sql = "SELECT roomId, typeId, image, price, statusId"
-                        + " FROM tblRoom"
-                        + " WHERE statusId=3"; //3 in DB means available
+                String sql = "SELECT roomId, typeId, image, price"
+                        + " FROM tblRoom";
                 stm = con.prepareStatement(sql);
                 rs = stm.executeQuery();
                 while (rs.next()) {
@@ -45,8 +45,7 @@ public class TblRoomDAO implements Serializable{
                     String typeId = rs.getString("typeId");
                     String image = rs.getString("image");
                     double price = rs.getDouble("price");
-                    int statusId = rs.getInt("statusId");
-                    tblRoomDTO dto = new tblRoomDTO(roomId, typeId, image, price, statusId);
+                    TblRoomDTO dto = new TblRoomDTO(roomId, typeId, image, price);
                     if (listRoom == null) {
                         listRoom = new ArrayList<>();
                     }
@@ -74,9 +73,9 @@ public class TblRoomDAO implements Serializable{
         try {
             con = DbHelpers.makeConnection();
             if (con != null) {
-                String sql = "SELECT roomId, image, price, statusId"
+                String sql = "SELECT roomId, image, price"
                         + " FROM tblRoom"
-                        + " WHERE typeId=? AND statusId=3"; //3 in DB means available
+                        + " WHERE typeId=?"; 
                 stm = con.prepareStatement(sql);
                 stm.setString(1, roomType);
                 
@@ -85,8 +84,7 @@ public class TblRoomDAO implements Serializable{
                     int roomId =rs.getInt("roomId");
                     String image = rs.getString("image");
                     double price = rs.getDouble("price");
-                    int statusId = rs.getInt("statusId");
-                    tblRoomDTO dto = new tblRoomDTO(roomId, roomType, image, price, statusId);
+                    TblRoomDTO dto = new TblRoomDTO(roomId, roomType, image, price);
                     if (listRoom == null) {
                         listRoom = new ArrayList<>();
                     }

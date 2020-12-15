@@ -40,16 +40,16 @@ public class LoadImageServlet extends HttpServlet {
 	
 	BufferedInputStream input = null;
 	BufferedOutputStream output = null;
-	File iamgeFile;
+	File imageFile;
 	
 	try {
-	    iamgeFile = new File(filePath);
+	    imageFile = new File(filePath);
 	    
-	    response.setContentType(getServletContext().getMimeType(iamgeFile.getName()));
-	    response.setHeader("Content-Length", String.valueOf(iamgeFile.length()));
-	    response.setHeader("Content-Disposition", "inline; filename=\"" + iamgeFile.getName() + "\"");
+	    response.setContentType(getServletContext().getMimeType(imageFile.getName()));
+	    response.setHeader("Content-Length", String.valueOf(imageFile.length()));
+	    response.setHeader("Content-Disposition", "inline; filename=\"" + imageFile.getName() + "\"");
 	    
-	    input = new BufferedInputStream(new FileInputStream(iamgeFile));
+	    input = new BufferedInputStream(new FileInputStream(imageFile));
 	    output = new BufferedOutputStream(response.getOutputStream());
 	    
 	    byte[] buffer = new byte[1024];

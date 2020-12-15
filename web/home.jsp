@@ -135,11 +135,13 @@
                                             <h5 class="card-header">
                                                 <span  style="font-weight: bold">Type: </span>
                                                 ${room.typeId}
+                                                <input type="hidden" name="roomType" value="${room.typeId}" />
                                             </h5>
                                             <img src="LoadImage?file=${room.image}" class="card-img-top"/>
                                             <div class="card-body">
                                                 <span  style="font-weight: bold">Price: </span>
-                                                ${room.price}
+                                                ${room.price} VND
+                                                <input type="hidden" name="roomPrice" value="${room.price}" />
                                             </div>
                                             <div class="card-footer">
                                                 <c:if test="${role eq 'user'}">
@@ -147,26 +149,10 @@
                                                     <c:url var="urlBook" value="BookRoom">
                                                         <c:param name="btnAction" value="Book"/>
                                                         <c:param name="roomId" value="${room.roomId}"/>
+                                                        <c:param name="typeId" value="${room.typeId}"/>
+                                                        <c:param name="roomPrice" value="${room.price}"/>
                                                     </c:url>
-
-                                                    <c:choose>
-                                                        <c:when test="${room.statusId == 3}"> <!-- 3 means Available in DB -->
-                                                            <a class="nav-link badge badge-primary" href="${urlBook}">Book</a>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <a href="${urlBook}" class="nav-link disabled">Book</a>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </c:if>
-
-                                                <c:if test="${role eq 'admin'}">
-                                                    <span  style="font-weight: bold">Status: </span>
-                                                    <c:if test="${room.statusId == 3}">
-                                                        Available
-                                                    </c:if>
-                                                    <c:if test="${room.statusId == 4}">
-                                                        Unavailable
-                                                    </c:if>
+                                                    <a class="nav-link badge badge-primary" href="${urlBook}">Book</a>
                                                 </c:if>
                                             </div>
                                         </div>

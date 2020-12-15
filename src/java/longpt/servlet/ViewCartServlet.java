@@ -7,10 +7,7 @@ package longpt.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
-import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -18,23 +15,21 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import longpt.tblroom.TblRoomDAO;
-import longpt.tblroom.TblRoomDTO;
-import longpt.tblroomtype.TblRoomTypeDAO;
-import longpt.tblroomtype.TblRoomTypeDTO;
+import javax.servlet.http.HttpSession;
+import longpt.cart.Cart;
+import longpt.tblaccount.TblAccountDTO;
 import org.apache.log4j.Logger;
 
 /**
  *
  * @author phamt
  */
-@WebServlet(name = "SearchRoomTypeServlet", urlPatterns = {"/SearchRoomTypeServlet"})
-public class SearchRoomTypeServlet extends HttpServlet {
+@WebServlet(name = "ViewCartServlet", urlPatterns = {"/ViewCartServlet"})
+public class ViewCartServlet extends HttpServlet {
 
-    private final String HOME_PAGE = "homepage";
+    private final String CART_PAGE = "cartpage";
     private final String HOME_CONTROLLER = "Home";
-    private final static Logger logger = Logger.getLogger(SearchRoomTypeServlet.class);
-
+    private final static Logger logger = Logger.getLogger(ViewCartServlet.class);
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -48,41 +43,29 @@ public class SearchRoomTypeServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        String url = "";
+        
+        String url = CART_PAGE;
         try {
-            String roomType = request.getParameter("cmbRoomType");
-
-            //Call DAO
-            TblRoomDAO roomDAO = new TblRoomDAO();
-            //Check search Value
-            if (roomType != null) {
-                roomDAO.searchRoomType(roomType);
-                //Get all room
-                List<TblRoomDTO> listRooms = roomDAO.getListRoom();
-                request.setAttribute("LIST_ROOM", listRooms);
-
-                //Get all Room type
-                TblRoomTypeDAO roomTypeDAO = new TblRoomTypeDAO();
-                roomTypeDAO.loadAllRoomType();
-
-                List<TblRoomTypeDTO> listRoomType = roomTypeDAO.getListRoomType();
-                request.setAttribute("LIST_ROOM_TYPE", listRoomType);
-                url = HOME_PAGE;
+            HttpSession session = request.getSession(false);
+            Cart cart = (Cart) session.getAttribute("CART");
+            TblAccountDTO dto = (TblAccountDTO) session.getAttribute("ACCOUNT");
+            if (dto != null) {
+                if (cart != null) {
+                    double total = cart.getTotalPrice();
+                    session.setAttribute("TOTAL_PRICE", total);
+                }
+                
+                //
             } else {
                 url = HOME_CONTROLLER;
             }
-        } catch (SQLException ex) {
-            //logger.error("SearchRoomTypeServlet _ SQLException: " + ex.getMessage());
-            log("SearchRoomTypeServlet _ SQLException: " + ex.getMessage());
-        } catch (NamingException ex) {
-            //logger.error("SearchRoomTypeServlet _ NamingException: " + ex.getMessage());
-            log("SearchRoomTypeServlet _ NamingException: " + ex.getMessage());
         } finally {
-            ServletContext context = request.getServletContext();
-            Map<String, String> listMap = (Map<String, String>) context.getAttribute("MAP");
-
-            RequestDispatcher rd = request.getRequestDispatcher(listMap.get(url));
-            rd.forward(request, response);
+//            ServletContext context = request.getServletContext();
+//            Map<String, String> listMap = (Map<String, String>) context.getAttribute("MAP");
+//            
+//            RequestDispatcher rd = request.getRequestDispatcher(listMap.get(url));
+//            rd.forward(request, response);
+            response.sendRedirect(url);
             out.close();
         }
     }

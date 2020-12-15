@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import longpt.tblroom.TblRoomDAO;
-import longpt.tblroom.tblRoomDTO;
+import longpt.tblroom.TblRoomDTO;
 import longpt.tblroomtype.TblRoomTypeDAO;
 import longpt.tblroomtype.TblRoomTypeDTO;
 import org.apache.log4j.Logger;
@@ -53,7 +53,7 @@ public class HomeServlet extends HttpServlet {
             TblRoomDAO roomDAO = new TblRoomDAO();
             roomDAO.loadAllRooms();
 
-            List<tblRoomDTO> listRooms = roomDAO.getListRoom();
+            List<TblRoomDTO> listRooms = roomDAO.getListRoom();
             request.setAttribute("LIST_ROOM", listRooms);
 
             //Get all Room type

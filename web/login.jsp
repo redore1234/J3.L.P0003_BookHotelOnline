@@ -30,7 +30,7 @@
                             <!-- reCAPTCHA -->
                             <div class="g-recaptcha"
                                  data-sitekey="6Lcvtv0ZAAAAAGWiju75FrjEg0vyC9dSEoecPvpA"></div>
-                            <div class="text-danger text-bold">${requestScope.CAPTCHA_ERROR}</div>
+                            <div class="h4 text-danger text-bold">${requestScope.CAPTCHA_ERROR}</div>
 
                             <!-- Login button -->
                             <input type="submit" value="Login" name="btnAction" class="btn btn-primary px-5 my-3"/>

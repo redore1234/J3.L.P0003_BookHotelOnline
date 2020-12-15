@@ -12,6 +12,10 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import longpt.cart.Cart;
+import longpt.cart.RoomItem;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -19,6 +23,9 @@ import javax.servlet.http.HttpServletResponse;
  */
 @WebServlet(name = "BookRoomServlet", urlPatterns = {"/BookRoomServlet"})
 public class BookRoomServlet extends HttpServlet {
+
+    private final String HOME_CONTROLLER = "Home";
+    private final static Logger logger = Logger.getLogger(BookRoomServlet.class);
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -33,9 +40,40 @@ public class BookRoomServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
+
+        String url = HOME_CONTROLLER;
+
         try {
-            
+            //Get Room Id
+            String room = request.getParameter("roomId");
+            int roomId = 0;
+            if (room != null) {
+                roomId = Integer.parseInt(room);
+            }
+            System.out.println("BookRoomServlet - roomId: " + room);
+            //Get price
+            String price = request.getParameter("roomPrice");
+            System.out.println("BookRoomServlet - price: " + price);
+            double roomPrice = 0;
+            if (price != null) {
+                roomPrice = Double.parseDouble(price);
+            }
+            //Get type Id
+            String typeId = request.getParameter("typeId");
+            System.out.println("BookRoomServlet - typeId: " + typeId);
+            //Call DAO 
+
+            HttpSession session = request.getSession();
+            Cart cart = (Cart) session.getAttribute("CART");
+            if (cart == null) {
+                cart = new Cart();
+            }
+            RoomItem roomItem = new RoomItem(roomId, typeId, roomPrice);
+            cart.bookRoomToCart(roomId, roomItem);
+            session.setAttribute("CART", cart);
+
         } finally {
+            response.sendRedirect(url);
             out.close();
         }
     }
