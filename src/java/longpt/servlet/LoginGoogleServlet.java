@@ -63,19 +63,15 @@ public class LoginGoogleServlet extends HttpServlet {
                     String email = googlePojo.getEmail();
                     
                     if (accountDAO.checkLoginGoogle(email) == null) {
-                        boolean result = accountDAO.createNewAccountGoogle(googlePojo.getEmail(), "12345678", googlePojo.getEmail());
-                        if (result == true) {
-                            url = LOGIN_PAGE;
-                        }
-                    } else {
-                        TblAccountDTO dto = new TblAccountDTO();
-                        dto.setFullName(googlePojo.getEmail());
-                        dto.setUsername(googlePojo.getEmail());
+                        accountDAO.createNewAccountGoogle(googlePojo.getEmail(), "12345678", googlePojo.getEmail(), "user");
+                    } 
+                    TblAccountDTO dto = new TblAccountDTO(email, "12345678", googlePojo.getEmail(), "user", 1); // 1 in DB is Active
+                    dto.setFullName(googlePojo.getEmail());
+                    dto.setUsername(googlePojo.getEmail());
 
-                        session.setAttribute("ACCOUNT", dto);
+                    session.setAttribute("ACCOUNT", dto);
 
-                        url = HOME_CONTROLLER;
-                    }
+                    url = HOME_CONTROLLER;
                 }
             }
         } catch (SQLException ex) {

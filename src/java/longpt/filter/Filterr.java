@@ -29,7 +29,7 @@ import longpt.tblaccount.TblAccountDTO;
  * @author phamt
  */
 @MultipartConfig(fileSizeThreshold = 1024 * 1024 * 10, // 2MB
-       maxFileSize = 1024 * 1024 * 10) // 10MB
+        maxFileSize = 1024 * 1024 * 10) // 10MB
 public class Filterr implements Filter {
 
     private final String HOME_CONTROLLER = "Home";
@@ -138,6 +138,9 @@ public class Filterr implements Filter {
                 switch (resource) {
                     case "Logout":
                     case "BookRoom":
+                    case "DeleteRoomFromCart":
+                    case "ViewCart":
+                    case "ViewHistory":
                         resource = "login";
                         break;
                     default:
@@ -160,6 +163,7 @@ public class Filterr implements Filter {
                         case "Login":
                         case "LoginGoogle":
                         case "BookRoom":
+                        case "DeleteRoomFromCart":
                         case "ViewCart":
                         case "ViewHistory":
                             resource = "Home";
@@ -168,7 +172,7 @@ public class Filterr implements Filter {
                             break;
                     }
                 }
-  
+
             }
         }
         url = listMap.get(resource);

@@ -7,6 +7,9 @@ package longpt.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -26,11 +29,12 @@ import org.apache.log4j.Logger;
  *
  * @author phamt
  */
-@WebServlet(name = "HomeServlet", urlPatterns = {"/HomeServlet"})
-public class HomeServlet extends HttpServlet {
+@WebServlet(name = "SearchDateServlet", urlPatterns = {"/SearchDateServlet"})
+public class SearchDateServlet extends HttpServlet {
 
     private final String HOME_PAGE = "homepage";
-    private final Logger logger = Logger.getLogger(HomeServlet.class.getName());
+    private final String HOME_CONTROLLER = "Home";
+    private final static Logger logger = Logger.getLogger(SearchDateServlet.class);
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -45,24 +49,59 @@ public class HomeServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        String url = HOME_PAGE;
-        try {
-            //Get all Room
-            TblRoomDAO roomDAO = new TblRoomDAO();
-            roomDAO.loadAllRooms();
 
-            List<TblRoomDTO> listRooms = roomDAO.getListRoom();
-            request.setAttribute("LIST_ROOM", listRooms);
+        String url = "";
+
+        try {
+            String checkin = request.getParameter("dtCheckin");
+            String checkout = request.getParameter("dtCheckout");
+
+            long millis = System.currentTimeMillis();
+            java.sql.Date currentDate = new java.sql.Date(millis);
+
+            //Change java.util to java.sql
+            
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            Date checkInDate = format.parse(checkin);
+            java.sql.Date sqlCheckInDate = new java.sql.Date(checkInDate.getTime());
+
+            Date checkOutDate = format.parse(checkout);
+            java.sql.Date sqlCheckOutDate = new java.sql.Date(checkOutDate.getTime());
+
+            //Call DAO
+            TblRoomDAO roomDAO = new TblRoomDAO();
+
+            if (sqlCheckInDate.after(sqlCheckOutDate)) { // checkin date sau checkout date
+                // false => load again
+                request.setAttribute("SEARCH_ERROR", "Checkin Date must before Checkout Date");
+                url = HOME_CONTROLLER;
+            } else if (sqlCheckInDate.compareTo(currentDate) < 0 || sqlCheckOutDate.compareTo(currentDate) < 0) { // checkin va checkout khong o truoc currentDate
+                // false => load again
+                request.setAttribute("SEARCH_ERROR", "Checkin Date and Checkout Date must after currentDate");
+                url = HOME_CONTROLLER;
+            } else {
+                //Search ROOM
+                roomDAO.searchRoomUnavailable(sqlCheckInDate, sqlCheckOutDate);
+                List<TblRoomDTO> listRoom = roomDAO.getListRoom();
+                request.setAttribute("LIST_ROOM", listRoom);
+                request.setAttribute("UNAVAILABLE_ROOM", "UNAVAILABLE");
+                
+                url = HOME_PAGE;
+                
+            }
+        } catch (ParseException ex) {
+            //logger.error("SearchDateServlet _ ParseException: " + ex.getMessage());
+            log("SearchDateServlet _ ParseException: " + ex.getMessage());
         } catch (SQLException ex) {
-            //logger.error("HomeServlet _ SQLException: " + ex.getMessage());
-            log("HomeServlet _ SQLException: " + ex.getMessage());
+            //logger.error("SearchDateServlet _ SQLException: " + ex.getMessage());
+            log("SearchDateServlet _ SQLException: " + ex.getMessage());
         } catch (NamingException ex) {
-            //logger.error("HomeServlet _ NamingException: " + ex.getMessage());
-            log("HomeServlet _ NamingException: " + ex.getMessage());
+            //logger.error("SearchDateServlet _ NamingException: " + ex.getMessage());
+            log("SearchDateServlet _ NamingException: " + ex.getMessage());
         } finally {
             ServletContext context = request.getServletContext();
             Map<String, String> listMap = (Map<String, String>) context.getAttribute("MAP");
-            
+
             RequestDispatcher rd = request.getRequestDispatcher(listMap.get(url));
             rd.forward(request, response);
             out.close();

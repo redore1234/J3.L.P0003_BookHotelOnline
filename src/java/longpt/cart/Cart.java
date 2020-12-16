@@ -39,7 +39,15 @@ public class Cart implements Serializable {
     }
 
     public void removeRoomFromCart(int roomId) {
-
+        if (this.compartment == null) {
+            return;
+        }
+        if (this.compartment.containsKey(roomId)) {
+            this.compartment.remove(roomId);
+            if (this.compartment.isEmpty()) {
+                this.compartment = null;
+            }
+        }
     }
 
     public double getTotalPrice() {
@@ -53,8 +61,8 @@ public class Cart implements Serializable {
         }
         return totalPrice;
     }
-    
-        //---DISCOUNT ID---//
+
+    //---DISCOUNT ID---//
     public int getDiscountID() {
         return discountID;
     }
@@ -78,11 +86,11 @@ public class Cart implements Serializable {
 
     //---DISCOUNT Price---//
     public double getPriceDiscount() {
-        if(discountPer != 0){
+        if (discountPer != 0) {
             double priceTotal = getTotalPrice();
             priceDiscount = priceTotal * discountPer / 100;
         }
-        
+
         return priceDiscount;
     }
 

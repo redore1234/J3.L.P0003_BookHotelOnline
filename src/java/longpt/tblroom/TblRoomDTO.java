@@ -21,6 +21,12 @@ public class TblRoomDTO implements Serializable {
     public TblRoomDTO() {
     }
 
+    public TblRoomDTO(int roomId, String typeId, double price) {
+        this.roomId = roomId;
+        this.typeId = typeId;
+        this.price = price;
+    }
+
     public TblRoomDTO(int roomId, String typeId, String image, double price) {
         this.roomId = roomId;
         this.typeId = typeId;

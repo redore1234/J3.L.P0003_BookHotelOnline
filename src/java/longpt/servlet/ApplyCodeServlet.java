@@ -8,8 +8,8 @@ package longpt.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -18,19 +18,20 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import longpt.tblroom.TblRoomDAO;
-import longpt.tblroom.TblRoomDTO;
+import javax.servlet.http.HttpSession;
+import longpt.cart.Cart;
+import longpt.tbldiscount.TblDiscountDAO;
 import org.apache.log4j.Logger;
 
 /**
  *
  * @author phamt
  */
-@WebServlet(name = "HomeServlet", urlPatterns = {"/HomeServlet"})
-public class HomeServlet extends HttpServlet {
+@WebServlet(name = "ApplyCodeServlet", urlPatterns = {"/ApplyCodeServlet"})
+public class ApplyCodeServlet extends HttpServlet {
 
-    private final String HOME_PAGE = "homepage";
-    private final Logger logger = Logger.getLogger(HomeServlet.class.getName());
+    private final static Logger logger = Logger.getLogger(ApplyCodeServlet.class);
+    private final String VIEW_CART_CONTROLLER = "ViewCart";
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -45,24 +46,40 @@ public class HomeServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        String url = HOME_PAGE;
-        try {
-            //Get all Room
-            TblRoomDAO roomDAO = new TblRoomDAO();
-            roomDAO.loadAllRooms();
 
-            List<TblRoomDTO> listRooms = roomDAO.getListRoom();
-            request.setAttribute("LIST_ROOM", listRooms);
+        String url = VIEW_CART_CONTROLLER;
+        try {
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                String disCode = request.getParameter("txtDiscount");
+                int code = 0;
+                if (disCode == null || disCode.isEmpty()) {
+                    return;
+                } else {
+                    code = Integer.parseInt(disCode);
+                }
+                TblDiscountDAO discountDAO = new TblDiscountDAO();
+                int percent = discountDAO.getDisPercentById(code);
+                if (percent > 0) { //discount code is existed
+                    Cart cart = (Cart) session.getAttribute("CART");
+                    if (cart != null) {
+                        cart.setDiscountID(code);
+                        cart.setDiscountPer(percent);
+                    }
+                } else {
+                    request.setAttribute("USED_DISCOUNT", "This code doesn't exist!");
+                }
+            }
         } catch (SQLException ex) {
-            //logger.error("HomeServlet _ SQLException: " + ex.getMessage());
-            log("HomeServlet _ SQLException: " + ex.getMessage());
+            //log("ApplyCodeServlet - SQLException: " + ex.getMessage());
+            logger.error("ApplyCodeServlet - SQLException: " + ex.getMessage());
         } catch (NamingException ex) {
-            //logger.error("HomeServlet _ NamingException: " + ex.getMessage());
-            log("HomeServlet _ NamingException: " + ex.getMessage());
+            //log("ApplyCodeServlet - NamingException: " + ex.getMessage());
+            logger.error("ApplyCodeServlet - NamingException: " + ex.getMessage());
         } finally {
             ServletContext context = request.getServletContext();
             Map<String, String> listMap = (Map<String, String>) context.getAttribute("MAP");
-            
+
             RequestDispatcher rd = request.getRequestDispatcher(listMap.get(url));
             rd.forward(request, response);
             out.close();

@@ -122,19 +122,19 @@ public class TblAccountDAO implements Serializable {
         return false;
     }
     
-    public boolean createNewAccountGoogle(String username, String password, String fullName) throws SQLException, NamingException {
+    public boolean createNewAccountGoogle(String username, String password, String fullName, String roleId) throws SQLException, NamingException {
         Connection con = null;
         PreparedStatement stm = null;
         try {
             con = DbHelpers.makeConnection();
             if (con != null) {
-                String sql = "INSERT INTO tblAccount(username, password, fullName)"
-                        + " VALUES (?,?,?)";
+                String sql = "INSERT INTO tblAccount(username, password, fullName, roleId)"
+                        + " VALUES (?,?,?,?)";
                 stm = con.prepareStatement(sql);
                 stm.setString(1, username);
                 stm.setString(2, password);
                 stm.setString(3, fullName);
-
+                stm.setString(4, roleId);
                 int row = stm.executeUpdate();
                 if (row > 0) {
                     return true;

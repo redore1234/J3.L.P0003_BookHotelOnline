@@ -70,11 +70,11 @@ INSERT dbo.tblOrder
           bookingDate
         )
 VALUES  ( 
-          'hau' , -- username - varchar(50)
-          N'hau' , -- name - nvarchar(50)
+          'long' , -- username - varchar(50)
+          N'long' , -- name - nvarchar(50)
           N'' , -- address - nvarchar(200)
           '' , -- phoneNumber - varchar(10)
-          2500000 , -- totalPay - decimal
+          2000000 , -- totalPay - decimal
           GETDATE()  -- bookingDate - datetime
         )
 
@@ -97,10 +97,10 @@ INSERT dbo.tblOrderDetail
           checkoutDate
         )
 VALUES  (
-          '0D9389A3-8BCF-48D9-A2E3-1A70305C86FF' , -- orderId - varchar(36)
-          2 , -- roomId - int
-          2500000 , -- totalPrice - decimal
-          '2020-12-17' , -- checkinDate - date
+          'FF812C8B-7493-46AE-A249-9E8CD525E3DB' , -- orderId - varchar(36)
+          1 , -- roomId - int
+          2000000 , -- totalPrice - decimal
+          '2020-12-18' , -- checkinDate - date
           '2020-12-19'  -- checkoutDate - date
         )
 
@@ -112,6 +112,11 @@ WHERE orderId IN  (
 	WHERE checkinDate='2020-12-16' AND checkoutDate='2020-12-18'
 	)
 GO 
+
+SELECT DISTINCT tblRoom.roomId , tblRoom.typeId, image, price 
+FROM tblOrderDetail 
+JOIN tblRoom ON tblOrderDetail.roomId = tblRoom.roomId 
+WHERE (checkInDate <= '2020-12-16' AND '2020-12-16' <= checkOutDate) OR (checkInDate <= '2020-12-18' AND '2020-12-18' <= checkOutDate) OR ('2020-12-16' <= checkInDate AND '2020-12-18' >= checkOutDate)
 
 DROP TABLE dbo.tblRole
 DROP TABLE dbo.tblStatus

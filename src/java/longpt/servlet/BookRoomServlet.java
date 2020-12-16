@@ -50,17 +50,14 @@ public class BookRoomServlet extends HttpServlet {
             if (room != null) {
                 roomId = Integer.parseInt(room);
             }
-            System.out.println("BookRoomServlet - roomId: " + room);
             //Get price
             String price = request.getParameter("roomPrice");
-            System.out.println("BookRoomServlet - price: " + price);
             double roomPrice = 0;
             if (price != null) {
                 roomPrice = Double.parseDouble(price);
             }
             //Get type Id
             String typeId = request.getParameter("typeId");
-            System.out.println("BookRoomServlet - typeId: " + typeId);
             //Call DAO 
 
             HttpSession session = request.getSession();
@@ -71,7 +68,6 @@ public class BookRoomServlet extends HttpServlet {
             RoomItem roomItem = new RoomItem(roomId, typeId, roomPrice);
             cart.bookRoomToCart(roomId, roomItem);
             session.setAttribute("CART", cart);
-
         } finally {
             response.sendRedirect(url);
             out.close();

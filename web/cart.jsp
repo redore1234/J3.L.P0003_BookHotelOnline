@@ -18,7 +18,6 @@
 
         <!-- Nav bar -->
         <c:set var="account" value="${sessionScope.ACCOUNT}"/>
-        <c:set var="role" value="${sessionScope.ACCOUNT_ROLE}"/>
 
         <nav class="navbar navbar-dark navbar-expand-sm bg-primary">
             <c:if test="${not empty account}">
@@ -26,7 +25,7 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="Home">Home</a>
                     </li>
-                    <c:if test="${role eq 'user'}">  
+                    <c:if test="${account.roleId ne 'admin'}">  
                         <!-- View Cart form -->
                         <c:url var="urlViewCart" value="ViewCart">
                             <c:param name="btnAction" value="View Cart"/>
@@ -40,16 +39,9 @@
                             <c:param name="btnAction" value="View History"/>
                         </c:url>
                         <li class="nav-item">
-                            <a href="${urlViewHistory}" class="nav-link active">Purchase History</a>
+                            <a href="${urlViewHistory}" class="nav-link active">Book History</a>
                         </li>
                     </c:if>
-                    <!-- Reload Page -->
-                    <li class="nav-item">
-                        <c:url var="urlReload" value="Home">
-                            <c:param name="btnAction" value="Reload"/>
-                        </c:url>
-                        <a class="nav-link active" href="${urlReload}">Reload</a>
-                    </li>
                 </ul>
 
                 <ul class="navbar-nav ml-auto text-center">
@@ -95,11 +87,10 @@
             <!-- CART FORM -->
             <c:choose>
                 <c:when test="${not empty cart}">
-                    <h4 class="card-header text-center" style="font-weight: bold">YOUR CART</h4>
                     <c:set var="compartment" value="${cart.compartment}"/>
                     <c:if test="${not empty compartment}">
                         <!-- Display cart -->
-                        <table class="table table-hover">
+                        <table class="table table-hover my-5">
                             <thead class="thead-light">
                                 <tr>
                                     <th>#</th>
@@ -111,23 +102,19 @@
                             </thead>
                             <tbody>
                                 <c:forEach var="room" items="${compartment}" varStatus="counter">
-                                    <c:set var="roomItem" value="${room.value}"/>
-                                <form action="CheckOut">
-                                    <input type="hidden" name="roomId" value="${roomItem.roomId}" />
+                                <form action="DeleteRoomFromCart">
+                                    <input type="hidden" name="roomId" value="${room.value.roomId}" />
                                     <tr>
                                         <td>${counter.count}</td>
-                                        <td>${roomItem.roomId}</td>
-                                        <td>${roomItem.typeId}</td>
-                                        <td>${roomItem.price}</td>
+                                        <td>${room.value.roomId}</td>
+                                        <td>${room.value.typeId}</td>
+                                        <td>${room.value.price}</td>
 
                                         <c:choose>
-                                            <c:when test="${role eq 'user'}">
-                                                <!--<td>
-                                                    <input type="submit" value="Update quantity" class="btn btn-warning" name="btnAction"/>
-                                                </td>-->
+                                            <c:when test="${account.roleId ne 'admin'}">
                                                 <td>
                                                     <a href="DeleteRoomFromCart?btnAction=Delete Cart&txtRoomId=${room.value.roomId}" class="btn btn-outline-danger" 
-                                                       onclick="return confirm('Do you want to delete this?');">
+                                                       onclick="return confirm('Do you want to delete ${room.value.typeId}?');">
                                                         Delete
                                                     </a>
                                                 </td>
@@ -144,21 +131,103 @@
                                 <td scope="row" colspan="4">Total Price:</td>
                                 <td scope="row">${totalPrice} VND</td>
                             </tr>
+                            <tr class="alert-primary" style="font-weight: bold">
+                                <td scope="row" colspan="2">Code:</td>
+                                <td scope="row">${cart.discountID}</td>
+                                <td scope="row" colspan="1">Discount:</td>
+                                <td scope="row">${cart.discountPer} %</td>
+                            </tr>
+                            <tr class="alert-primary" style="font-weight: bold">
+                                <td scope="row" colspan="4">Discount Price:</td>
+                                <td scope="row">${cart.priceDiscount} VND</td>
+                            </tr>
+                            <tr class="alert-primary" style="font-weight: bold">
+                                <td scope="row" colspan="4">Total Pay:</td>
+                                <td scope="row">${cart.priceAfterDiscount} VND</td>
+                            </tr>
                             </tbody>
                         </table>
-                    </c:if>
-                </c:when>
-                <c:otherwise>
-                    <div class="container h-100">
-                        <div class="row h-100  justify-content-center">
-                            <div class="col-6 text-center">
-                                <h2 class="text-danger">Your cart is empty</h2>
+
+                        <!-- CHECK OUT FORM -->
+                        <div class="my-5">
+                            <div class="card">
+                                <h4 class="card-header text-center" style="font-weight: bold">CHECKOUT</h4>
+                                <div class="m-3">
+                                    <div class="form-group">
+                                        <div class="text-danger text-center" style="font-weight: bold">
+                                            Please check your Cart before click Check out to ensure everything is correct!
+                                        </div>
+                                        <form action="ApplyCode">
+                                            <input type="text" name="txtDiscount" value="${param.txtDiscount}" onkeypress=" return (event.charCode == 8 || event.charCode == 0) ? null : event.charCode >= 48 && event.charCode <= 57" 
+                                                   title="Please input number" class="form-control" placeholder="Enter discount code"/>
+                                            <c:if test="${not empty requestScope.USED_DISCOUNT}">
+                                                <small class="text-danger text-bold">${requestScope.USED_DISCOUNT}</small></br>
+                                            </c:if>
+                                            <button type="submit" name="btAction" value="Apply Code" class="btn btn-primary mt-2">Add discount</button>
+                                        </form>
+                                    </div>
+                                    <form action="CheckOut">
+                                        <div class="form-group">
+                                            <label>Name</label>
+                                            <c:if test="${not empty account}"> 
+                                                <input type="text" name="txtCustomerName" value="${account.fullName}" 
+                                                       onkeypress='return ((event.charCode >= 65 && event.charCode <= 90) || (event.charCode >= 97 && event.charCode <= 122) || (event.charCode == 32))'
+                                                       maxlength="50" class="form-control" required/>
+                                            </c:if>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Address</label>
+                                            <input type="text" name="txtAddress" value="${param.txtAddress}" maxlength="200" class="form-control"/>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Phone</label>
+                                            <input type="tel" name="txtPhone" pattern="[0-9]{10}" maxlength="10" value="${param.txtPhone}"
+                                                   onkeypress=" return (event.charCode == 8 || event.charCode == 0) ? null : event.charCode >= 48 && event.charCode <= 57" 
+                                                   class="form-control" >
+                                        </div>
+
+                                        <div class="form-group form-inline">
+                                            <label>Check in</label>
+                                            <input type="date" name="dtCheckin" value="${param.dtCheckin}" class="form-control ml-2"/> 
+                                            <label class="ml-2">Check out</label>
+                                            <input type="date" name="dtCheckout" value="${param.dtCheckout}" class="form-control ml-2"/> 
+                                        </div>
+
+                                        <c:choose>
+                                            <c:when test="${account.roleId ne 'admin'}">
+                                                <div class="text-right">
+                                                    <input type="submit" value="Check out" class="btn btn-success mt-3" name="btnAction"/>
+                                                </div>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <c:redirect url="Home"/>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </form>
+                                </div>
+                            </c:if>
+                            <c:if test="${empty compartment}">
+                                <div class="container h-100">
+                                    <div class="row h-100  justify-content-center">
+                                        <div class="col-6 text-center">
+                                            <h2 class="text-danger ">Your cart is empty</h2>
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:if>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="container h-100">
+                                <div class="row h-100  justify-content-center">
+                                    <div class="col-6 text-center">
+                                        <h2 class="text-danger">Your cart is empty</h2>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </c:otherwise>
-            </c:choose>
-        </div>
-        <script src="assets/js/bootstrap.min.js"></script>
-    </body>
-</html>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+                <script src="assets/js/bootstrap.min.js"></script>
+                </body>
+                </html>

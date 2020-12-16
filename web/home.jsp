@@ -17,7 +17,6 @@
     <body>
         <!-- Nav bar -->
         <c:set var="account" value="${sessionScope.ACCOUNT}"/>
-        <c:set var="role" value="${sessionScope.ACCOUNT_ROLE}"/>
 
         <nav class="navbar navbar-dark navbar-expand-sm bg-primary">
             <c:if test="${not empty account}">
@@ -25,7 +24,7 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="Home">Home</a>
                     </li>
-                    <c:if test="${role eq 'user'}">  
+                    <c:if test="${account.roleId ne 'admin'}">  
                         <!-- View Cart form -->
                         <c:url var="urlViewCart" value="ViewCart">
                             <c:param name="btnAction" value="View Cart"/>
@@ -39,16 +38,9 @@
                             <c:param name="btnAction" value="View History"/>
                         </c:url>
                         <li class="nav-item">
-                            <a href="${urlViewHistory}" class="nav-link active">Purchase History</a>
+                            <a href="${urlViewHistory}" class="nav-link active">Book History</a>
                         </li>
                     </c:if>
-                    <!-- Reload Page -->
-                    <li class="nav-item">
-                        <c:url var="urlReload" value="Home">
-                            <c:param name="btnAction" value="Reload"/>
-                        </c:url>
-                        <a class="nav-link active" href="${urlReload}">Reload</a>
-                    </li>
                 </ul>
 
                 <ul class="navbar-nav ml-auto text-center">
@@ -68,13 +60,6 @@
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
                         <a class="nav-link active" href="Home">Home</a>
-                    </li>
-                    <!-- Reload Page -->
-                    <li class="nav-item">
-                        <c:url var="urlReload" value="Home">
-                            <c:param name="btnAction" value="Reload"/>
-                        </c:url>
-                        <a class="nav-link active" href="${urlReload}">Reload</a>
                     </li>
                 </ul>
 
@@ -99,28 +84,12 @@
                         <div class="text-right">
                             <input type="submit" value="Search Date" class="btn btn-success my-3 ml-2" /> 
                         </div>
-                    </form>
-
-
-                    <form action="SearchRoomType" class="form-group form-inline">
-                        <c:set var="roomTypeList" value="${requestScope.LIST_ROOM_TYPE}"/>
-                        <label>Room Type</label>
-                        <select name="cmbRoomType" class="form-control ml-2">
-                            <c:forEach var="item" items="${roomTypeList}">
-                                <option value="${item.typeId}"
-                                        <c:if test="${item.typeId eq param.cmbRoomType}">
-                                            selected="true"
-                                        </c:if>
-                                        >
-                                    ${item.typeName}
-                                </option>
-                            </c:forEach>
-                        </select>
-                        <div class="text-right">
-                            <input type="submit" value="Search Type" class="btn btn-success my-3 ml-2" /> 
+                        <div class="ml-2 text-danger text-bold">
+                            <c:if test="${not empty requestScope.SEARCH_ERROR}">
+                                ${requestScope.SEARCH_ERROR}
+                            </c:if>
                         </div>
                     </form>
-
 
                     <!-- Display result -->
                     <c:set var="roomList" value="${requestScope.LIST_ROOM}"/>
@@ -144,7 +113,10 @@
                                                 <input type="hidden" name="roomPrice" value="${room.price}" />
                                             </div>
                                             <div class="card-footer">
-                                                <c:if test="${role eq 'user'}">
+                                                <c:if test="${not empty requestScope.UNAVAILABLE_ROOM}">
+                                                    <div class="h3 text-danger text-bold"> ${requestScope.UNAVAILABLE_ROOM} </div>
+                                                </c:if>
+                                                <c:if test="${account.roleId eq 'user'}">
                                                     <!-- Add to Cart form-->
                                                     <c:url var="urlBook" value="BookRoom">
                                                         <c:param name="btnAction" value="Book"/>

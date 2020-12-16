@@ -7,50 +7,41 @@ package longpt.cart;
 
 import java.io.Serializable;
 import java.sql.Date;
+import longpt.tblroom.TblRoomDTO;
 
 /**
  *
  * @author phamt
  */
-public class RoomItem implements Serializable {
+public class RoomItem extends TblRoomDTO implements Serializable {
 
-    private int roomId;
-    private String typeId;
-    private double price;
+    private double total;
     private Date checkinDate;
     private Date checkoutDate;
 
-    public RoomItem() {
-    }
-
     public RoomItem(int roomId, String typeId, double price) {
-        this.roomId = roomId;
-        this.typeId = typeId;
-        this.price = price;
+        super(roomId, typeId, price);
     }
 
-    public int getRoomId() {
-        return roomId;
+    public RoomItem(double total, Date checkinDate, Date checkoutDate) {
+        this.total = total;
+        this.checkinDate = checkinDate;
+        this.checkoutDate = checkoutDate;
     }
 
-    public void setRoomId(int roomId) {
-        this.roomId = roomId;
+    public RoomItem(double total, Date checkinDate, Date checkoutDate, int roomId, String typeId, String image, double price) {
+        super(roomId, typeId, image, price);
+        this.total = total;
+        this.checkinDate = checkinDate;
+        this.checkoutDate = checkoutDate;
     }
 
-    public String getTypeId() {
-        return typeId;
+    public double getTotal() {
+        return total;
     }
 
-    public void setTypeId(String typeId) {
-        this.typeId = typeId;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
+    public void setTotal(double total) {
+        this.total = total;
     }
 
     public Date getCheckinDate() {

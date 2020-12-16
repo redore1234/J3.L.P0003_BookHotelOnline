@@ -5,9 +5,9 @@
  */
 package longpt.tblroom;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,14 +20,14 @@ import longpt.dbulti.DbHelpers;
  *
  * @author phamt
  */
-public class TblRoomDAO implements Serializable{
-    
+public class TblRoomDAO implements Serializable {
+
     private List<TblRoomDTO> listRoom;
 
     public List<TblRoomDTO> getListRoom() {
         return listRoom;
     }
-    
+
     public void loadAllRooms() throws SQLException, NamingException {
         Connection con = null;
         PreparedStatement stm = null;
@@ -41,7 +41,7 @@ public class TblRoomDAO implements Serializable{
                 stm = con.prepareStatement(sql);
                 rs = stm.executeQuery();
                 while (rs.next()) {
-                    int roomId =rs.getInt("roomId");
+                    int roomId = rs.getInt("roomId");
                     String typeId = rs.getString("typeId");
                     String image = rs.getString("image");
                     double price = rs.getDouble("price");
@@ -64,8 +64,8 @@ public class TblRoomDAO implements Serializable{
             }
         }
     }
-    
-    public void searchRoomType(String roomType) throws SQLException, NamingException {
+
+    public void searchRoomUnavailable(Date checkInDate, Date checkoutDate) throws SQLException, NamingException {
         Connection con = null;
         PreparedStatement stm = null;
         ResultSet rs = null;
@@ -73,15 +73,22 @@ public class TblRoomDAO implements Serializable{
         try {
             con = DbHelpers.makeConnection();
             if (con != null) {
-                String sql = "SELECT roomId, image, price"
-                        + " FROM tblRoom"
-                        + " WHERE typeId=?"; 
+                String sql = "SELECT DISTINCT tblRoom.roomId , tblRoom.typeId, image, price"
+                        + " FROM tblOrderDetail"
+                        + " JOIN tblRoom ON tblOrderDetail.roomId = tblRoom.roomId"
+                        + " WHERE (checkinDate <= ? AND ? <= checkoutDate) OR (checkinDate <= ? AND ? <= checkoutDate) OR (? <= checkinDate AND ? >= checkoutDate)";
                 stm = con.prepareStatement(sql);
-                stm.setString(1, roomType);
-                
+                stm.setDate(1, checkInDate);
+                stm.setDate(2, checkInDate);
+                stm.setDate(3, checkoutDate);
+                stm.setDate(4, checkoutDate);
+                stm.setDate(5, checkInDate);
+                stm.setDate(6, checkoutDate);
+
                 rs = stm.executeQuery();
                 while (rs.next()) {
-                    int roomId =rs.getInt("roomId");
+                    int roomId = rs.getInt("roomId");
+                    String roomType = rs.getString("typeId");
                     String image = rs.getString("image");
                     double price = rs.getDouble("price");
                     TblRoomDTO dto = new TblRoomDTO(roomId, roomType, image, price);

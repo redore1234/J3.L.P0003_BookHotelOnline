@@ -21,7 +21,6 @@ import javax.servlet.http.HttpSession;
 import longpt.dbulti.ReCaptchaVerify;
 import longpt.tblaccount.TblAccountDAO;
 import longpt.tblaccount.TblAccountDTO;
-import longpt.tblrole.TblRoleDAO;
 
 /**
  *
@@ -70,12 +69,6 @@ public class LoginServlet extends HttpServlet {
 
                         //put the account to session
                         session.setAttribute("ACCOUNT", accountDTO);
-
-                        //put the role to session
-                        TblRoleDAO roleDAO = new TblRoleDAO();
-                        String role = roleDAO.getRole(accountDTO.getRoleId());
-                        session.setAttribute("ACCOUNT_ROLE", role);
-
                         url = HOME_CONTROLLER;
                     } else {
                         url = INVALID_PAGE;
