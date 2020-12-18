@@ -7,9 +7,9 @@ package longpt.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
 import java.util.Map;
-import javax.naming.NamingException;
+import java.util.Random;
+import javax.mail.MessagingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -18,20 +18,19 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import longpt.cart.Cart;
-import longpt.tbldiscount.TblDiscountDAO;
+import longpt.dbulti.SendMail;
+import longpt.tblaccount.TblAccountDTO;
 import org.apache.log4j.Logger;
 
 /**
  *
  * @author phamt
  */
-@WebServlet(name = "ApplyCodeServlet", urlPatterns = {"/ApplyCodeServlet"})
-public class ApplyCodeServlet extends HttpServlet {
+@WebServlet(name = "SendVerifyCodeServlet", urlPatterns = {"/SendVerifyCodeServlet"})
+public class SendVerifyCodeServlet extends HttpServlet {
 
-    private final String VIEW_CART_CONTROLLER = "ViewCart";
-    private final String CART_PAGE = "cartpage";
-    private final static Logger logger = Logger.getLogger(ApplyCodeServlet.class);
+    private final String VERIFY_BOOKING_PAGE = "verifybookingpage";
+    private Logger log = Logger.getLogger(SendVerifyCodeServlet.class);
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -47,35 +46,38 @@ public class ApplyCodeServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
 
-        String url = VIEW_CART_CONTROLLER;
+        String url = VERIFY_BOOKING_PAGE;
+
         try {
             HttpSession session = request.getSession(false);
             if (session != null) {
-                String disCode = request.getParameter("txtDiscount");
-                int code = 0;
-                if (disCode == null || disCode.isEmpty()) {
-                    return;
-                } else {
-                    code = Integer.parseInt(disCode);
+                TblAccountDTO accountDTO = (TblAccountDTO) session.getAttribute("ACCOUNT");
+                String username = null;
+                if (accountDTO != null) {
+                    username = accountDTO.getUsername();
                 }
-                TblDiscountDAO discountDAO = new TblDiscountDAO();
-                int percent = discountDAO.getDisPercentById(code);
-                if (percent > 0) { //discount code is existed
-                    Cart cart = (Cart) session.getAttribute("CART");
-                    if (cart != null) {
-                        cart.setDiscountID(code);
-                        cart.setDiscountPer(percent);
-                        session.setAttribute("CART", cart);
-                    }
-                } else {
-                    request.setAttribute("USED_DISCOUNT", "This code doesn't exist!");
-                    url = CART_PAGE;
-                }
+
+                //Get name, address and phone and put them in session scope
+                String name = request.getParameter("txtCustomerName");
+                session.setAttribute("NAME_ACCOUNT", name);
+
+                String address = request.getParameter("txtAddress");
+                session.setAttribute("ADDRESS", address);
+
+                String phone = request.getParameter("txtPhone");
+                session.setAttribute("PHONE", phone);
+
+                //Generate random code with 4 digit
+                String code = generateRandomCode(4);
+
+                //put confirmation code to request scope
+                session.setAttribute("CONFIRMATION_CODE", code);
+
+                //send activation mail
+                SendMail.sendAccountActivationCode(code, username);
             }
-        } catch (SQLException ex) {
-            logger.error("ApplyCodeServlet - SQLException: " + ex.getMessage());
-        } catch (NamingException ex) {
-            logger.error("ApplyCodeServlet - NamingException: " + ex.getMessage());
+        } catch (MessagingException ex) {
+            log.error("SendVerifyCodeServlet _ MessagingException: " + ex.getMessage());
         } finally {
             ServletContext context = request.getServletContext();
             Map<String, String> listMap = (Map<String, String>) context.getAttribute("MAP");
@@ -84,6 +86,16 @@ public class ApplyCodeServlet extends HttpServlet {
             rd.forward(request, response);
             out.close();
         }
+    }
+
+    private String generateRandomCode(int length) {
+        Random random = new Random();
+        String code = "";
+
+        for (int i = 0; i < length; i++) {
+            code += random.nextInt(10);
+        }
+        return code;
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

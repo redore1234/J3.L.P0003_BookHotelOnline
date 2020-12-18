@@ -7,9 +7,6 @@ package longpt.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Map;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -18,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import longpt.cart.Cart;
 import longpt.tblaccount.TblAccountDTO;
-import org.apache.log4j.Logger;
 
 /**
  *
@@ -29,7 +25,7 @@ public class ViewCartServlet extends HttpServlet {
 
     private final String CART_PAGE = "cartpage";
     private final String HOME_CONTROLLER = "Home";
-    private final static Logger logger = Logger.getLogger(ViewCartServlet.class);
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -43,7 +39,7 @@ public class ViewCartServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        
+
         String url = CART_PAGE;
         try {
             HttpSession session = request.getSession(false);
@@ -54,17 +50,10 @@ public class ViewCartServlet extends HttpServlet {
                     double total = cart.getTotalPrice();
                     session.setAttribute("TOTAL_PRICE", total);
                 }
-                
-                //
             } else {
                 url = HOME_CONTROLLER;
             }
         } finally {
-//            ServletContext context = request.getServletContext();
-//            Map<String, String> listMap = (Map<String, String>) context.getAttribute("MAP");
-//            
-//            RequestDispatcher rd = request.getRequestDispatcher(listMap.get(url));
-//            rd.forward(request, response);
             response.sendRedirect(url);
             out.close();
         }

@@ -29,7 +29,6 @@ import org.apache.log4j.Logger;
 public class LoginGoogleServlet extends HttpServlet {
 
     private final String INVALID_PAGE = "invalid";
-    private final String LOGIN_PAGE = "login";
     private final String HOME_CONTROLLER = "Home";
     private final Logger logger = Logger.getLogger(LoginGoogleServlet.class);
 
@@ -61,10 +60,10 @@ public class LoginGoogleServlet extends HttpServlet {
                 HttpSession session = request.getSession();
                 if (session != null) {
                     String email = googlePojo.getEmail();
-                    
+
                     if (accountDAO.checkLoginGoogle(email) == null) {
                         accountDAO.createNewAccountGoogle(googlePojo.getEmail(), "12345678", googlePojo.getEmail(), "user");
-                    } 
+                    }
                     TblAccountDTO dto = new TblAccountDTO(email, "12345678", googlePojo.getEmail(), "user", 1); // 1 in DB is Active
                     dto.setFullName(googlePojo.getEmail());
                     dto.setUsername(googlePojo.getEmail());
@@ -75,11 +74,9 @@ public class LoginGoogleServlet extends HttpServlet {
                 }
             }
         } catch (SQLException ex) {
-            //logger.error("LoginGoogle Servlet SQLException: " + ex.getMessage());
-            log("LoginGoogle Servlet SQLException: " + ex.getMessage());
+            logger.error("LoginGoogle Servlet SQLException: " + ex.getMessage());
         } catch (NamingException ex) {
-            //logger.error("LoginGoogle Servlet NamingException: " + ex.getMessage());
-            log("LoginGoogle Servlet NamingException: " + ex.getMessage());
+            logger.error("LoginGoogle Servlet NamingException: " + ex.getMessage());
         } finally {
             response.sendRedirect(url);
             out.close();

@@ -15,7 +15,7 @@
         <link rel="stylesheet" href="assets/css/customize.css">
     </head>
     <body>
-        <div class="container-fluid h-100 bg-custom">
+        <div class="container-fluid h-100">
             <div class="row h-100 justify-content-center align-items-center">
                 <div class="card col-10 col-md-8 col-lg-6 p-5">
                     <div class="text-center pb-3">
@@ -54,7 +54,7 @@
                             <label>Phone</label>
                             <input type="tel" class="form-control" placeholder="" name="txtPhone" 
                                    onkeypress=" return (event.charCode == 8 || event.charCode == 0) ? null : event.charCode >= 48 && event.charCode <= 57"
-                                   value="${param.txtPhone}" minlength="10" required />
+                                   value="${param.txtPhone}" pattern="[0-9]{10}" maxlength="10" required />
                             <small  class="text-muted">Must be 10 chars</small>
                         </div>
                         

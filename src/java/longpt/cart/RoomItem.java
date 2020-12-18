@@ -6,7 +6,6 @@
 package longpt.cart;
 
 import java.io.Serializable;
-import java.sql.Date;
 import longpt.tblroom.TblRoomDTO;
 
 /**
@@ -16,20 +15,23 @@ import longpt.tblroom.TblRoomDTO;
 public class RoomItem extends TblRoomDTO implements Serializable {
 
     private double total;
-    private Date checkinDate;
-    private Date checkoutDate;
+    private String checkinDate;
+    private String checkoutDate;
+
+    public RoomItem() {
+    }
 
     public RoomItem(int roomId, String typeId, double price) {
         super(roomId, typeId, price);
     }
 
-    public RoomItem(double total, Date checkinDate, Date checkoutDate) {
+    public RoomItem(double total, String checkinDate, String checkoutDate) {
         this.total = total;
         this.checkinDate = checkinDate;
         this.checkoutDate = checkoutDate;
     }
 
-    public RoomItem(double total, Date checkinDate, Date checkoutDate, int roomId, String typeId, String image, double price) {
+    public RoomItem(double total, String checkinDate, String checkoutDate, int roomId, String typeId, String image, double price) {
         super(roomId, typeId, image, price);
         this.total = total;
         this.checkinDate = checkinDate;
@@ -44,19 +46,19 @@ public class RoomItem extends TblRoomDTO implements Serializable {
         this.total = total;
     }
 
-    public Date getCheckinDate() {
+    public String getCheckinDate() {
         return checkinDate;
     }
 
-    public void setCheckinDate(Date checkinDate) {
+    public void setCheckinDate(String checkinDate) {
         this.checkinDate = checkinDate;
     }
 
-    public Date getCheckoutDate() {
+    public String getCheckoutDate() {
         return checkoutDate;
     }
 
-    public void setCheckoutDate(Date checkoutDate) {
+    public void setCheckoutDate(String checkoutDate) {
         this.checkoutDate = checkoutDate;
     }
 }

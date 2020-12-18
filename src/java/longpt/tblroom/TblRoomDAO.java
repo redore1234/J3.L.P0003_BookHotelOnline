@@ -65,15 +65,49 @@ public class TblRoomDAO implements Serializable {
         }
     }
 
-    public void searchRoomUnavailable(Date checkInDate, Date checkoutDate) throws SQLException, NamingException {
+    public String getRoomTypeById(int roomId) throws SQLException, NamingException {
         Connection con = null;
         PreparedStatement stm = null;
         ResultSet rs = null;
-
+        String type = null;
         try {
             con = DbHelpers.makeConnection();
             if (con != null) {
-                String sql = "SELECT DISTINCT tblRoom.roomId , tblRoom.typeId, image, price"
+                String sql = "SELECT typeId"
+                        + " FROM tblRoom"
+                        + " WHERE roomId=?";
+                stm = con.prepareStatement(sql);
+                stm.setInt(1, roomId);
+
+                rs = stm.executeQuery();
+                if (rs.next()) {
+                    type = rs.getString("typeId");
+                }
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (stm != null) {
+                stm.close();
+            }
+            if (con != null) {
+                con.close();
+            }
+        }
+        return type;
+    }
+
+    //return list of roomId is unavailable
+    public List<Integer> searchRoomUnavailable(Date checkInDate, Date checkoutDate) throws SQLException, NamingException {
+        Connection con = null;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        List<Integer> listRoomId = null;
+        try {
+            con = DbHelpers.makeConnection();
+            if (con != null) {
+                String sql = "SELECT DISTINCT tblRoom.roomId"
                         + " FROM tblOrderDetail"
                         + " JOIN tblRoom ON tblOrderDetail.roomId = tblRoom.roomId"
                         + " WHERE (checkinDate <= ? AND ? <= checkoutDate) OR (checkinDate <= ? AND ? <= checkoutDate) OR (? <= checkinDate AND ? >= checkoutDate)";
@@ -88,15 +122,12 @@ public class TblRoomDAO implements Serializable {
                 rs = stm.executeQuery();
                 while (rs.next()) {
                     int roomId = rs.getInt("roomId");
-                    String roomType = rs.getString("typeId");
-                    String image = rs.getString("image");
-                    double price = rs.getDouble("price");
-                    TblRoomDTO dto = new TblRoomDTO(roomId, roomType, image, price);
-                    if (listRoom == null) {
-                        listRoom = new ArrayList<>();
+                    if (listRoomId == null) {
+                        listRoomId = new ArrayList<>();
                     }
-                    listRoom.add(dto);
+                    listRoomId.add(roomId);
                 }
+                return listRoomId;
             }
         } finally {
             if (rs != null) {
@@ -109,5 +140,61 @@ public class TblRoomDAO implements Serializable {
                 con.close();
             }
         }
+        return null;
     }
+
+    public List<TblRoomDTO> searchRoomAvailable(List<Integer> listRoomUnavailable) throws SQLException, NamingException {
+        Connection con = null;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        try {
+            con = DbHelpers.makeConnection();
+            if (con != null) {
+                String sql = "SELECT roomId, typeId, image, price"
+                        + " FROM tblRoom";
+
+                int count = 0;
+                // count when listRoomUnavailable is not null 
+                if (listRoomUnavailable != null) {
+                    sql += " WHERE roomId!=?";
+                    count = listRoomUnavailable.size();
+                    for (int i = 1; i < count; i++) { //start in the position 1 because roomId in where is the position 0
+                        sql += " AND roomId!=?";
+                    }
+                }
+                stm = con.prepareStatement(sql);
+
+                if (listRoomUnavailable != null) {
+                    for (int i = 0; i < count; i++) {
+                        stm.setInt(i + 1, listRoomUnavailable.get(i));
+                    }
+                }
+                rs = stm.executeQuery();
+                while (rs.next()) {
+                    int roomId = rs.getInt("roomId");
+                    String roomType = rs.getString("typeId");
+                    String image = rs.getString("image");
+                    double price = rs.getDouble("price");
+                    TblRoomDTO dto = new TblRoomDTO(roomId, roomType, image, price);
+                    if (listRoom == null) {
+                        listRoom = new ArrayList<>();
+                    }
+                    listRoom.add(dto);
+                }
+                return listRoom;
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (stm != null) {
+                stm.close();
+            }
+            if (con != null) {
+                con.close();
+            }
+        }
+        return null;
+    }
+
 }

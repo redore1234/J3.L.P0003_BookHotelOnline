@@ -12,7 +12,8 @@ import java.sql.Date;
  *
  * @author phamt
  */
-public class TblOrderDetailDTO implements Serializable{
+public class TblOrderDetailDTO implements Serializable {
+
     private int detailId;
     private String orderId;
     private int roomId;

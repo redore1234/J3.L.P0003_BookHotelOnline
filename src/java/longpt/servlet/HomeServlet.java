@@ -54,15 +54,13 @@ public class HomeServlet extends HttpServlet {
             List<TblRoomDTO> listRooms = roomDAO.getListRoom();
             request.setAttribute("LIST_ROOM", listRooms);
         } catch (SQLException ex) {
-            //logger.error("HomeServlet _ SQLException: " + ex.getMessage());
-            log("HomeServlet _ SQLException: " + ex.getMessage());
+            logger.error("HomeServlet _ SQLException: " + ex.getMessage());
         } catch (NamingException ex) {
-            //logger.error("HomeServlet _ NamingException: " + ex.getMessage());
-            log("HomeServlet _ NamingException: " + ex.getMessage());
+            logger.error("HomeServlet _ NamingException: " + ex.getMessage());
         } finally {
             ServletContext context = request.getServletContext();
             Map<String, String> listMap = (Map<String, String>) context.getAttribute("MAP");
-            
+
             RequestDispatcher rd = request.getRequestDispatcher(listMap.get(url));
             rd.forward(request, response);
             out.close();

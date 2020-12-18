@@ -55,28 +55,11 @@ CREATE TABLE tblOrder (
 	address NVARCHAR(200),
 	phoneNumber VARCHAR(10),
 	discountId INT FOREIGN KEY REFERENCES dbo.tblDiscount(discountId),
-	totalPay DECIMAL NOT NULL,
+	totalPrice DECIMAL NOT NULL,
+	discountPrice DECIMAL NOT NULL,
 	bookingDate DATETIME DEFAULT GETDATE(), 
 ) 
 GO
-
-INSERT dbo.tblOrder 
-        ( 
-          username ,
-          name ,
-          address ,
-          phoneNumber ,
-          totalPay ,
-          bookingDate
-        )
-VALUES  ( 
-          'long' , -- username - varchar(50)
-          N'long' , -- name - nvarchar(50)
-          N'' , -- address - nvarchar(200)
-          '' , -- phoneNumber - varchar(10)
-          2000000 , -- totalPay - decimal
-          GETDATE()  -- bookingDate - datetime
-        )
 
 CREATE TABLE tblOrderDetail (
 	detailId INT IDENTITY(1,1) PRIMARY KEY,
@@ -87,36 +70,6 @@ CREATE TABLE tblOrderDetail (
 	checkoutDate DATE NOT NULL,
 )
 GO
-
-INSERT dbo.tblOrderDetail
-        ( 
-          orderId ,
-          roomId ,
-          totalPrice ,
-          checkinDate ,
-          checkoutDate
-        )
-VALUES  (
-          'FF812C8B-7493-46AE-A249-9E8CD525E3DB' , -- orderId - varchar(36)
-          1 , -- roomId - int
-          2000000 , -- totalPrice - decimal
-          '2020-12-18' , -- checkinDate - date
-          '2020-12-19'  -- checkoutDate - date
-        )
-
-SELECT  *
-FROM dbo.tblOrder
-WHERE orderId IN  (
-	SELECT orderId
-	FROM dbo.tblOrderDetail
-	WHERE checkinDate='2020-12-16' AND checkoutDate='2020-12-18'
-	)
-GO 
-
-SELECT DISTINCT tblRoom.roomId , tblRoom.typeId, image, price 
-FROM tblOrderDetail 
-JOIN tblRoom ON tblOrderDetail.roomId = tblRoom.roomId 
-WHERE (checkInDate <= '2020-12-16' AND '2020-12-16' <= checkOutDate) OR (checkInDate <= '2020-12-18' AND '2020-12-18' <= checkOutDate) OR ('2020-12-16' <= checkInDate AND '2020-12-18' >= checkOutDate)
 
 DROP TABLE dbo.tblRole
 DROP TABLE dbo.tblStatus

@@ -130,7 +130,7 @@ public class Filterr implements Filter {
 
         int lastIndex = uri.lastIndexOf("/");
         String resource = uri.substring(lastIndex + 1);
-        System.out.println("Filter - Resource: " + resource);
+
         if (resource.isEmpty()) {
             resource = HOME_CONTROLLER;
         } else {
@@ -140,7 +140,16 @@ public class Filterr implements Filter {
                     case "BookRoom":
                     case "DeleteRoomFromCart":
                     case "ViewCart":
-                    case "ViewHistory":
+                    case "LoadOrder":
+                    case "TrackOrder":
+                    case "ApplyCode":
+                    case "CheckOut":
+                    case "SendVerifyCode":
+                    case "VerifyBooking":
+                    case "ChooseDate":
+                    case "cartpage":
+                    case "trackorderpage":
+                    case "verifybookingpage":
                         resource = "login";
                         break;
                     default:
@@ -165,7 +174,16 @@ public class Filterr implements Filter {
                         case "BookRoom":
                         case "DeleteRoomFromCart":
                         case "ViewCart":
-                        case "ViewHistory":
+                        case "LoadOrder":
+                        case "TrackOrder":
+                        case "ApplyCode":
+                        case "CheckOut":
+                        case "SendVerifyCode":
+                        case "VerifyBooking":
+                        case "ChooseDate":
+                        case "cartpage":
+                        case "trackorderpage":
+                        case "verifybookingpage":
                             resource = "Home";
                             break;
                         default:
@@ -176,7 +194,6 @@ public class Filterr implements Filter {
             }
         }
         url = listMap.get(resource);
-        System.out.println("Filter - URL: " + url);
         if (url != null) {
             RequestDispatcher rd = req.getRequestDispatcher(url);
             rd.forward(req, res);

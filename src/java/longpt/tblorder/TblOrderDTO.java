@@ -13,6 +13,7 @@ import java.sql.Date;
  * @author phamt
  */
 public class TblOrderDTO implements Serializable {
+
     private String orderId;
     private String username;
     private String name;
@@ -37,8 +38,6 @@ public class TblOrderDTO implements Serializable {
         this.discountPrice = discountPrice;
         this.bookDate = bookDate;
     }
-
-
 
     public String getOrderId() {
         return orderId;
@@ -111,6 +110,5 @@ public class TblOrderDTO implements Serializable {
     public void setBookDate(Date bookDate) {
         this.bookDate = bookDate;
     }
-    
-    
+
 }

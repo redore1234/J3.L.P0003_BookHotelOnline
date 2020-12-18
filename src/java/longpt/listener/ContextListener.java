@@ -49,8 +49,7 @@ public class ContextListener implements ServletContextListener {
             logger.error("ContextListener _ FileNotFoundException: " + ex.getMessage());
         } catch (IOException ex) {
             logger.error("ContextListener _ IOException: " + ex.getMessage());
-        }
-        finally {
+        } finally {
             if (bufferedReader != null) {
                 try {
                     bufferedReader.close();
@@ -71,7 +70,6 @@ public class ContextListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-//        ServletContext context = sce.getServletContext();
-//        context.removeAttribute("MAP");
+
     }
 }

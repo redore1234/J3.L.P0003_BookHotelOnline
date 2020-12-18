@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import longpt.cart.Cart;
 import longpt.cart.RoomItem;
-import org.apache.log4j.Logger;
 
 /**
  *
@@ -25,7 +24,6 @@ import org.apache.log4j.Logger;
 public class BookRoomServlet extends HttpServlet {
 
     private final String HOME_CONTROLLER = "Home";
-    private final static Logger logger = Logger.getLogger(BookRoomServlet.class);
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>

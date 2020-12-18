@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import longpt.cart.Cart;
 import longpt.tblaccount.TblAccountDTO;
-import org.apache.log4j.Logger;
 
 /**
  *
@@ -26,7 +25,6 @@ public class DeleteRoomFromCartServlet extends HttpServlet {
 
     private final String VIEW_CART_CONTROLLER = "ViewCart";
     private final String HOME_CONTROLLER = "Home";
-    private final static Logger logger = Logger.getLogger(DeleteRoomFromCartServlet.class);
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -58,12 +56,12 @@ public class DeleteRoomFromCartServlet extends HttpServlet {
 
                         Cart cart = (Cart) session.getAttribute("CART");
                         if (cart != null) {
-                            //Map<Integer, RoomItem> compartment = cart.getCompartment();
                             cart.removeRoomFromCart(roomId);
                             if (cart.getCompartment() == null) {
                                 cart = null;
                             }
                             session.setAttribute("CART", cart);
+                            url = VIEW_CART_CONTROLLER;
                         }
                     } else {
                         url = HOME_CONTROLLER;

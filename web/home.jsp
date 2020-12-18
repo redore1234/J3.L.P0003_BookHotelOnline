@@ -34,8 +34,8 @@
                         </li>
 
                         <!-- Load Order Form -->
-                        <c:url var="urlViewHistory" value="ViewHistory">
-                            <c:param name="btnAction" value="View History"/>
+                        <c:url var="urlViewHistory" value="LoadOrder">
+                            <c:param name="btnAction" value="Load Order"/>
                         </c:url>
                         <li class="nav-item">
                             <a href="${urlViewHistory}" class="nav-link active">Book History</a>

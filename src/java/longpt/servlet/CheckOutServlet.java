@@ -8,6 +8,9 @@ package longpt.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
@@ -19,10 +22,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import longpt.cart.Cart;
+import longpt.cart.CheckOutError;
+import longpt.cart.RoomItem;
 import longpt.tblaccount.TblAccountDTO;
 import longpt.tbldiscount.TblDiscountDAO;
 import longpt.tblorder.TblOrderDAO;
 import longpt.tblorderdetail.TblOrderDetailDAO;
+import longpt.tblroom.TblRoomDAO;
 import org.apache.log4j.Logger;
 
 /**
@@ -33,7 +39,7 @@ import org.apache.log4j.Logger;
 public class CheckOutServlet extends HttpServlet {
 
     private final String VIEW_CART_CONTROLLER = "ViewCart";
-    private final String HOME_CONTROLLER = "Home";
+    private final String CART_PAGE = "cartpage";
     private final static Logger logger = Logger.getLogger(CheckOutServlet.class);
 
     /**
@@ -51,59 +57,120 @@ public class CheckOutServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
 
         String url = VIEW_CART_CONTROLLER;
+        boolean foundErr = false;
+        CheckOutError error = new CheckOutError();
         try {
-            String name = request.getParameter("txtCustomerName");
-            String address = request.getParameter("txtAddress");
-            String phone = request.getParameter("txtPhone");
-
-            String checkin = request.getParameter("dtCheckin");
-            System.out.println("CheckOutServlet - checkin: " + checkin);
-            String checkout = request.getParameter("dtCheckout");
-            System.out.println("CheckOutServlet - checkout: " + checkout);
-
-
             HttpSession session = request.getSession(false);
+
             if (session != null) {
+                String name = (String) session.getAttribute("NAME_ACCOUNT");
+
+                String address = (String) session.getAttribute("ADDRESS");
+
+                String phone = (String) session.getAttribute("PHONE");
+
                 Cart cart = (Cart) session.getAttribute("CART");
                 if (cart != null) {
                     if (cart.getCompartment() != null) {
-                        //INSERT ORDER
-                        TblOrderDAO orderDAO = new TblOrderDAO();
-                        //Get username 
-                        String username = null;
-                        TblAccountDTO accountDTO = (TblAccountDTO) session.getAttribute("ACCOUNT");
-                        if (accountDTO != null) {
-                            username = accountDTO.getUsername();
-                        }
-                        int discountId = cart.getDiscountID();
-                        double totalPrice = cart.getTotalPrice();
-                        double discountPrice = cart.getPriceAfterDiscount();
-                        String orderId = orderDAO.createOrder(username, name, address, phone, totalPrice, discountPrice);
-                        if (orderId != null) {
-                            //---UPDATE DISCOUNT STATUS---//
-                            TblDiscountDAO discountDAO = new TblDiscountDAO();
-                            if (discountDAO.deleteDiscount(discountId) == true) {
-                                //INSERT ORDER DETAIL
-                                TblOrderDetailDAO orderDetailDAO = new TblOrderDetailDAO();
-                                boolean result = orderDetailDAO.addOrderDetail(cart, orderId, checkin, checkout);
-                                if (result == true) {
-                                    session.removeAttribute("CART");
+                        String checkin = "";
+                        String checkout = "";
 
-                                    request.setAttribute("TRACKING", orderId);
+                        Map<Integer, RoomItem> item = cart.getCompartment();
+                        for (Integer roomId : item.keySet()) {
+                            checkin = item.get(roomId).getCheckinDate();
+                            checkout = item.get(roomId).getCheckoutDate();
+                        }
+
+                        long millis = System.currentTimeMillis();
+                        java.sql.Date currentDate = new java.sql.Date(millis);
+
+                        //Change java.util to java.sql
+                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                        java.util.Date checkInDate = format.parse(checkin);
+                        java.sql.Date sqlCheckInDate = new java.sql.Date(checkInDate.getTime());
+
+                        java.util.Date checkOutDate = format.parse(checkout);
+                        java.sql.Date sqlCheckOutDate = new java.sql.Date(checkOutDate.getTime());
+
+                        if (sqlCheckInDate.after(sqlCheckOutDate)) {
+                            error.setCheckInAfterCheckOut("Checkin Date must before Checkout Date");
+                            foundErr = true;
+                        } else if (sqlCheckInDate.before(currentDate) || sqlCheckOutDate.before(currentDate)) {
+                            error.setCheckInCheckOutBeforeCurDate("Checkin Date and Checkout Date must after currentDate");
+                            foundErr = true;
+                        } else {
+                            TblRoomDAO roomDAO = new TblRoomDAO();
+                            List<Integer> listRoomId = roomDAO.searchRoomUnavailable(sqlCheckInDate, sqlCheckOutDate);
+                            if (listRoomId != null) {
+                                boolean unvalidInCart = false;
+                                //Check trong cart có những roomId nào không hợp lệ
+                                for (Integer roomId : listRoomId) {
+                                    if (cart.getCompartment().containsKey(roomId)) {
+                                        unvalidInCart = true;
+                                    }
+                                }
+                                if (unvalidInCart) {
+                                    foundErr = true;
+                                    String errMsg = "These rooms are not available: ";
+                                    for (int i = 0; i < listRoomId.size(); i++) {
+                                        errMsg += listRoomId.get(i) + "";
+
+                                        if (i != listRoomId.size() - 1) {
+                                            errMsg += ", ";
+                                        }
+
+                                    }
+                                    error.setRoomIdBooked(errMsg);
+                                }
+                            }
+                        }
+
+                        if (foundErr == true) {
+                            request.setAttribute("CHECKOUT_ERROR", error);
+                            url = CART_PAGE;
+                        } else {
+                            //INSERT ORDER
+                            TblOrderDAO orderDAO = new TblOrderDAO();
+                            //Get username 
+                            String username = null;
+                            TblAccountDTO accountDTO = (TblAccountDTO) session.getAttribute("ACCOUNT");
+
+                            if (accountDTO != null) {
+                                username = accountDTO.getUsername();
+                            }
+
+                            int discountId = cart.getDiscountID();
+                            double totalPrice = cart.getTotalPrice();
+                            double discountPrice = cart.getPriceAfterDiscount();
+                            String orderId = orderDAO.createOrder(username, name, address, phone, discountId, totalPrice, discountPrice);
+                            if (orderId != null) {
+                                //---UPDATE DISCOUNT STATUS---//
+                                TblDiscountDAO discountDAO = new TblDiscountDAO();
+                                if (discountDAO.deleteDiscount(discountId) == true) {
+                                    //INSERT ORDER DETAIL
+                                    TblOrderDetailDAO orderDetailDAO = new TblOrderDetailDAO();
+
+                                    boolean result = orderDetailDAO.addOrderDetail(cart, orderId, checkin, checkout);
+                                    if (result == true) {
+                                        session.removeAttribute("CART");
+                                        session.removeAttribute("NAME_ACCOUNT");
+                                        session.removeAttribute("ADDRESS");
+                                        session.removeAttribute("PHONE");
+
+                                        request.setAttribute("TRACKING", orderId);
+                                    }
                                 }
                             }
                         }
                     }
-                } else {
-                    url = HOME_CONTROLLER;
                 }
             }
         } catch (SQLException ex) {
-            //logger.error("CheckOutServlet _ SQLException: " + ex.getMessage());
-            log("CheckOutServlet _ SQLException: " + ex.getMessage());
+            logger.error("CheckOutServlet _ SQLException: " + ex.getMessage());
         } catch (NamingException ex) {
-            //logger.error("CheckOutServlet _ NamingException: " + ex.getMessage());
-            log("CheckOutServlet _ NamingException: " + ex.getMessage());
+            logger.error("CheckOutServlet _ NamingException: " + ex.getMessage());
+        } catch (ParseException ex) {
+            logger.error("CheckOutServlet _ ParseException: " + ex.getMessage());
         } finally {
             ServletContext context = request.getServletContext();
             Map<String, String> listMap = (Map<String, String>) context.getAttribute("MAP");

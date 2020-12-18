@@ -21,6 +21,7 @@ import javax.servlet.http.HttpSession;
 import longpt.dbulti.ReCaptchaVerify;
 import longpt.tblaccount.TblAccountDAO;
 import longpt.tblaccount.TblAccountDTO;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -32,6 +33,7 @@ public class LoginServlet extends HttpServlet {
     private final String INVALID_PAGE = "invalid";
     private final String HOME_CONTROLLER = "Home";
     private final String LOGIN_PAGE = "login";
+    private final Logger logger = Logger.getLogger(LoginServlet.class);
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -78,11 +80,9 @@ public class LoginServlet extends HttpServlet {
                 url = LOGIN_PAGE;
             }
         } catch (SQLException ex) {
-            //logger.error("LoginServlet _ SQLException: " + ex.getMessage());
-            log("LoginServlet _ SQLException: " + ex.getMessage());
+            logger.error("LoginServlet _ SQLException: " + ex.getMessage());
         } catch (NamingException ex) {
-            //logger.error("LoginServlet _ NamingException: " + ex.getMessage());
-            log("LoginServlet _ NamingException: " + ex.getMessage());
+            logger.error("LoginServlet _ NamingException: " + ex.getMessage());
         } finally {
             if (loginSuccessful == true) {
                 response.sendRedirect(url);

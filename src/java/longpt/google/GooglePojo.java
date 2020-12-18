@@ -10,8 +10,7 @@ package longpt.google;
  * @author phamt
  */
 public class GooglePojo {
-//naming rule is not camel-case because using gson 
-    //to get information from json return by google
+
     private String id;
     private String email;
     private boolean verified_email;
@@ -98,5 +97,5 @@ public class GooglePojo {
     public void setPicture(String picture) {
         this.picture = picture;
     }
-    
+
 }

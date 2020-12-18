@@ -7,9 +7,7 @@ package longpt.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
 import java.util.Map;
-import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -18,20 +16,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import longpt.cart.Cart;
-import longpt.tbldiscount.TblDiscountDAO;
-import org.apache.log4j.Logger;
 
 /**
  *
  * @author phamt
  */
-@WebServlet(name = "ApplyCodeServlet", urlPatterns = {"/ApplyCodeServlet"})
-public class ApplyCodeServlet extends HttpServlet {
+@WebServlet(name = "VerifyBookingServlet", urlPatterns = {"/VerifyBookingServlet"})
+public class VerifyBookingServlet extends HttpServlet {
 
-    private final String VIEW_CART_CONTROLLER = "ViewCart";
-    private final String CART_PAGE = "cartpage";
-    private final static Logger logger = Logger.getLogger(ApplyCodeServlet.class);
+    private final String VERIFY_BOOKING_PAGE = "verifybookingpage";
+    private final String CHECK_OUT_CONTROLLER = "CheckOut";
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -47,35 +41,24 @@ public class ApplyCodeServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
 
-        String url = VIEW_CART_CONTROLLER;
+        String url = "";
+
         try {
+            String activateCode = request.getParameter("txtActivationCode");
+
             HttpSession session = request.getSession(false);
             if (session != null) {
-                String disCode = request.getParameter("txtDiscount");
-                int code = 0;
-                if (disCode == null || disCode.isEmpty()) {
-                    return;
+
+                String confirmCode = (String) session.getAttribute("CONFIRMATION_CODE");
+                if (!activateCode.equals(confirmCode)) {
+                    request.setAttribute("ACTIVATE_ERROR", "The inputted code is wrong! Please try again or resend the activation code!");
+                    url = VERIFY_BOOKING_PAGE;
                 } else {
-                    code = Integer.parseInt(disCode);
-                }
-                TblDiscountDAO discountDAO = new TblDiscountDAO();
-                int percent = discountDAO.getDisPercentById(code);
-                if (percent > 0) { //discount code is existed
-                    Cart cart = (Cart) session.getAttribute("CART");
-                    if (cart != null) {
-                        cart.setDiscountID(code);
-                        cart.setDiscountPer(percent);
-                        session.setAttribute("CART", cart);
-                    }
-                } else {
-                    request.setAttribute("USED_DISCOUNT", "This code doesn't exist!");
-                    url = CART_PAGE;
+                    session.removeAttribute("CONFIRMATION_CODE");
+
+                    url = CHECK_OUT_CONTROLLER;
                 }
             }
-        } catch (SQLException ex) {
-            logger.error("ApplyCodeServlet - SQLException: " + ex.getMessage());
-        } catch (NamingException ex) {
-            logger.error("ApplyCodeServlet - NamingException: " + ex.getMessage());
         } finally {
             ServletContext context = request.getServletContext();
             Map<String, String> listMap = (Map<String, String>) context.getAttribute("MAP");

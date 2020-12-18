@@ -8,6 +8,7 @@ package longpt.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
@@ -18,20 +19,20 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import longpt.cart.Cart;
-import longpt.tbldiscount.TblDiscountDAO;
+import longpt.tblaccount.TblAccountDTO;
+import longpt.tblorder.TblOrderDAO;
+import longpt.tblorder.TblOrderDTO;
 import org.apache.log4j.Logger;
 
 /**
  *
  * @author phamt
  */
-@WebServlet(name = "ApplyCodeServlet", urlPatterns = {"/ApplyCodeServlet"})
-public class ApplyCodeServlet extends HttpServlet {
+@WebServlet(name = "LoadOrderServlet", urlPatterns = {"/LoadOrderServlet"})
+public class LoadOrderServlet extends HttpServlet {
 
-    private final String VIEW_CART_CONTROLLER = "ViewCart";
-    private final String CART_PAGE = "cartpage";
-    private final static Logger logger = Logger.getLogger(ApplyCodeServlet.class);
+    private final String TRACK_ORDER_PAGE = "trackorderpage";
+    private final static Logger logger = Logger.getLogger(LoadOrderServlet.class);
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -47,35 +48,28 @@ public class ApplyCodeServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
 
-        String url = VIEW_CART_CONTROLLER;
+        String url = TRACK_ORDER_PAGE;
         try {
+            //Get username to track order
+            String username = null;
             HttpSession session = request.getSession(false);
             if (session != null) {
-                String disCode = request.getParameter("txtDiscount");
-                int code = 0;
-                if (disCode == null || disCode.isEmpty()) {
-                    return;
-                } else {
-                    code = Integer.parseInt(disCode);
-                }
-                TblDiscountDAO discountDAO = new TblDiscountDAO();
-                int percent = discountDAO.getDisPercentById(code);
-                if (percent > 0) { //discount code is existed
-                    Cart cart = (Cart) session.getAttribute("CART");
-                    if (cart != null) {
-                        cart.setDiscountID(code);
-                        cart.setDiscountPer(percent);
-                        session.setAttribute("CART", cart);
-                    }
-                } else {
-                    request.setAttribute("USED_DISCOUNT", "This code doesn't exist!");
-                    url = CART_PAGE;
+                TblAccountDTO accountDTO = (TblAccountDTO) session.getAttribute("ACCOUNT");
+                if (accountDTO != null) {
+                    username = accountDTO.getUsername();
                 }
             }
+
+            //Get order list
+            TblOrderDAO orderDAO = new TblOrderDAO();
+            orderDAO.loadAllOrder(username);
+
+            List<TblOrderDTO> listOrders = orderDAO.getListOrder();
+            request.setAttribute("ORDER_HISTORY", listOrders);
         } catch (SQLException ex) {
-            logger.error("ApplyCodeServlet - SQLException: " + ex.getMessage());
+            logger.error("LoadOrderServlet _ SQLException: " + ex.getMessage());
         } catch (NamingException ex) {
-            logger.error("ApplyCodeServlet - NamingException: " + ex.getMessage());
+            logger.error("LoadOrderServlet _ NamingException: " + ex.getMessage());
         } finally {
             ServletContext context = request.getServletContext();
             Map<String, String> listMap = (Map<String, String>) context.getAttribute("MAP");

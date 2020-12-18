@@ -7,10 +7,10 @@ package longpt.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
@@ -21,20 +21,22 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import longpt.cart.Cart;
+import longpt.cart.CheckOutError;
+import longpt.cart.RoomItem;
 import longpt.tblroom.TblRoomDAO;
-import longpt.tblroom.TblRoomDTO;
 import org.apache.log4j.Logger;
 
 /**
  *
  * @author phamt
  */
-@WebServlet(name = "SearchDateServlet", urlPatterns = {"/SearchDateServlet"})
-public class SearchDateServlet extends HttpServlet {
+@WebServlet(name = "ChooseDateServlet", urlPatterns = {"/ChooseDateServlet"})
+public class ChooseDateServlet extends HttpServlet {
 
-    private final String HOME_PAGE = "homepage";
-    private final String HOME_CONTROLLER = "Home";
-    private final static Logger logger = Logger.getLogger(SearchDateServlet.class);
+    private final String CART_PAGE = "cartpage";
+    private final static Logger logger = Logger.getLogger(ChooseDateServlet.class);
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -49,8 +51,10 @@ public class SearchDateServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
+        String url = CART_PAGE;
 
-        String url = HOME_PAGE;
+        boolean foundErr = false;
+        CheckOutError error = new CheckOutError();
 
         try {
             String checkin = request.getParameter("dtCheckin");
@@ -67,38 +71,69 @@ public class SearchDateServlet extends HttpServlet {
             Date checkOutDate = format.parse(checkout);
             java.sql.Date sqlCheckOutDate = new java.sql.Date(checkOutDate.getTime());
 
-            //Call DAO
-            TblRoomDAO roomDAO = new TblRoomDAO();
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                Cart cart = (Cart) session.getAttribute("CART");
+                if (cart != null) {
+                    if (cart.getCompartment() != null) {
+                        if (sqlCheckInDate.after(sqlCheckOutDate)) {
+                            error.setCheckInAfterCheckOut("Checkin Date must before Checkout Date");
+                            foundErr = true;
+                        } else if (sqlCheckInDate.before(currentDate) || sqlCheckOutDate.before(currentDate)) {
+                            error.setCheckInCheckOutBeforeCurDate("Checkin Date and Checkout Date must after currentDate");
+                            foundErr = true;
+                        } else {
+                            TblRoomDAO roomDAO = new TblRoomDAO();
+                            List<Integer> listRoomId = roomDAO.searchRoomUnavailable(sqlCheckInDate, sqlCheckOutDate);
+                            if (listRoomId != null) {
+                                boolean unvalidInCart = false;
+                                //Check trong cart có những roomId nào không hợp lệ
+                                for (Integer roomId : listRoomId) {
+                                    if (cart.getCompartment().containsKey(roomId)) {
+                                        unvalidInCart = true;
+                                    }
+                                }
+                                if (unvalidInCart) {
+                                    foundErr = true;
+                                    String errMsg = "These rooms are not available: ";
+                                    for (int i = 0; i < listRoomId.size(); i++) {
+                                        errMsg += listRoomId.get(i) + "";
 
-            if (sqlCheckInDate.after(sqlCheckOutDate)) { // checkin date sau checkout date
-                // false => load again
-                request.setAttribute("SEARCH_ERROR", "Checkin Date must before Checkout Date");
-                url = HOME_CONTROLLER;
-            } else if (sqlCheckInDate.before(currentDate) || sqlCheckOutDate.before(currentDate)) { // checkin va checkout khong o truoc currentDate
-                // false => load again
-                request.setAttribute("SEARCH_ERROR", "Checkin Date and Checkout Date must after currentDate");
-                url = HOME_CONTROLLER;
-            } else {
-                //Search ROOM
-                List<Integer> listRoomId = roomDAO.searchRoomUnavailable(sqlCheckInDate, sqlCheckOutDate);
-                if (listRoomId != null) {
-                    roomDAO.searchRoomAvailable(listRoomId);
-                    List<TblRoomDTO> listRoom = roomDAO.getListRoom();
-                    request.setAttribute("LIST_ROOM", listRoom);
-                    url = HOME_PAGE;
-                } else {
-                    url = HOME_CONTROLLER;
+                                        if (i != listRoomId.size() - 1) {
+                                            errMsg += ", ";
+                                        }
+
+                                    }
+                                    error.setRoomIdBooked(errMsg);
+                                }
+                            }
+                        }
+
+                        if (foundErr == true) {
+                            request.setAttribute("CHECKOUT_ERROR", error);
+                            url = CART_PAGE;
+                        } else {
+                            Map<Integer, RoomItem> item = cart.getCompartment();
+                            for (Integer roomId : item.keySet()) {
+                                if (cart.getCompartment().containsKey(roomId)) {
+                                    item.get(roomId).setCheckinDate(checkin);
+                                    item.get(roomId).setCheckoutDate(checkout);
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        } catch (ParseException ex) {
-            logger.error("SearchDateServlet _ ParseException: " + ex.getMessage());
         } catch (SQLException ex) {
-            logger.error("SearchDateServlet _ SQLException: " + ex.getMessage());
+            logger.error("ChooseDateServlet _ SQLException: " + ex.getMessage());
         } catch (NamingException ex) {
-            logger.error("SearchDateServlet _ NamingException: " + ex.getMessage());
+            logger.error("ChooseDateServlet _ NamingException: " + ex.getMessage());
+        } catch (ParseException ex) {
+            logger.error("ChooseDateServlet _ ParseException: " + ex.getMessage());
         } finally {
             ServletContext context = request.getServletContext();
             Map<String, String> listMap = (Map<String, String>) context.getAttribute("MAP");
+
             RequestDispatcher rd = request.getRequestDispatcher(listMap.get(url));
             rd.forward(request, response);
             out.close();

@@ -35,8 +35,8 @@
                         </li>
 
                         <!-- Load Order Form -->
-                        <c:url var="urlViewHistory" value="ViewHistory">
-                            <c:param name="btnAction" value="View History"/>
+                        <c:url var="urlViewHistory" value="LoadOrder">
+                            <c:param name="btnAction" value="Load Order"/>
                         </c:url>
                         <li class="nav-item">
                             <a href="${urlViewHistory}" class="nav-link active">Book History</a>
@@ -160,13 +160,37 @@
                                         <form action="ApplyCode">
                                             <input type="text" name="txtDiscount" value="${param.txtDiscount}" onkeypress=" return (event.charCode == 8 || event.charCode == 0) ? null : event.charCode >= 48 && event.charCode <= 57" 
                                                    title="Please input number" class="form-control" placeholder="Enter discount code"/>
-                                            <c:if test="${not empty requestScope.USED_DISCOUNT}">
-                                                <small class="text-danger text-bold">${requestScope.USED_DISCOUNT}</small></br>
-                                            </c:if>
                                             <button type="submit" name="btAction" value="Apply Code" class="btn btn-primary mt-2">Add discount</button>
+                                            <c:if test="${not empty requestScope.USED_DISCOUNT}">
+                                                <p class="text-danger text-bold">${requestScope.USED_DISCOUNT}</p>
+                                            </c:if>
                                         </form>
                                     </div>
-                                    <form action="CheckOut">
+                                    <div class="form-group ">
+                                        <form action="ChooseDate" class="form-inline">
+                                            <label>Check in</label>
+                                            <input type="date" name="dtCheckin" value="${param.dtCheckin}" class="form-control ml-2" required/> 
+                                            <input type="hidden" name="dtCheckin" value="${param.dtCheckin}" />
+                                            <label class="ml-2">Check out</label>
+                                            <input type="date" name="dtCheckout" value="${param.dtCheckout}" class="form-control ml-2" required/> 
+                                            <input type="hidden" name="dtCheckout" value="${param.dtCheckout}" />
+                                            <input type="submit" value="Choose Date" name="btnAction" class="btn btn-primary ml-2"/>
+                                        </form>
+                                    </div>
+
+                                    <!-- CHECK OUT ERROR -->
+                                    <c:set var="checkOutError" value="${requestScope.CHECKOUT_ERROR}"/>
+                                    <c:if test="${not empty checkOutError.checkInAfterCheckOut}">
+                                        <p class="text-danger">  ${checkOutError.checkInAfterCheckOut} </p>
+                                    </c:if>
+                                    <c:if test="${not empty checkOutError.checkInCheckOutBeforeCurDate}">
+                                        <p class="text-danger">  ${checkOutError.checkInCheckOutBeforeCurDate} </p>
+                                    </c:if>
+                                    <c:if test="${not empty checkOutError.roomIdBooked}">
+                                        <p class="text-danger">  ${checkOutError.roomIdBooked} </p>
+                                    </c:if>
+
+                                    <form action="SendVerifyCode">
                                         <div class="form-group">
                                             <label>Name</label>
                                             <c:if test="${not empty account}"> 
@@ -177,27 +201,20 @@
                                         </div>
                                         <div class="form-group">
                                             <label>Address</label>
-                                            <input type="text" name="txtAddress" value="${param.txtAddress}" maxlength="200" class="form-control"/>
+                                            <input type="text" name="txtAddress" value="${param.txtAddress}" maxlength="200" class="form-control" required/>
                                         </div>
 
                                         <div class="form-group">
                                             <label>Phone</label>
                                             <input type="tel" name="txtPhone" pattern="[0-9]{10}" maxlength="10" value="${param.txtPhone}"
                                                    onkeypress=" return (event.charCode == 8 || event.charCode == 0) ? null : event.charCode >= 48 && event.charCode <= 57" 
-                                                   class="form-control" >
-                                        </div>
-
-                                        <div class="form-group form-inline">
-                                            <label>Check in</label>
-                                            <input type="date" name="dtCheckin" value="${param.dtCheckin}" class="form-control ml-2"/> 
-                                            <label class="ml-2">Check out</label>
-                                            <input type="date" name="dtCheckout" value="${param.dtCheckout}" class="form-control ml-2"/> 
+                                                   class="form-control" required>
                                         </div>
 
                                         <c:choose>
                                             <c:when test="${account.roleId ne 'admin'}">
                                                 <div class="text-right">
-                                                    <input type="submit" value="Check out" class="btn btn-success mt-3" name="btnAction"/>
+                                                    <input type="submit" value="Check out" name="btnAction"  class="btn btn-primary" />
                                                 </div>
                                             </c:when>
                                             <c:otherwise>
@@ -206,28 +223,21 @@
                                         </c:choose>
                                     </form>
                                 </div>
-                            </c:if>
-                            <c:if test="${empty compartment}">
-                                <div class="container h-100">
-                                    <div class="row h-100  justify-content-center">
-                                        <div class="col-6 text-center">
-                                            <h2 class="text-danger ">Your cart is empty</h2>
-                                        </div>
-                                    </div>
-                                </div>
-                            </c:if>
-                        </c:when>
-                        <c:otherwise>
-                            <div class="container h-100">
-                                <div class="row h-100  justify-content-center">
-                                    <div class="col-6 text-center">
-                                        <h2 class="text-danger">Your cart is empty</h2>
-                                    </div>
-                                </div>
                             </div>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-                <script src="assets/js/bootstrap.min.js"></script>
-                </body>
-                </html>
+                        </div>
+                    </c:if>
+                </c:when>
+                <c:otherwise>
+                    <div class="container h-100">
+                        <div class="row h-100  justify-content-center">
+                            <div class="col-6 text-center">
+                                <h2 class="text-danger">Your cart is empty</h2>
+                            </div>
+                        </div>
+                    </div>
+                </c:otherwise>
+            </c:choose>
+        </div>
+        <script src="assets/js/bootstrap.min.js"></script>
+    </body>
+</html>

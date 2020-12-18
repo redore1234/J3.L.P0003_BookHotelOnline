@@ -18,20 +18,22 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import longpt.cart.Cart;
-import longpt.tbldiscount.TblDiscountDAO;
+import longpt.tblaccount.TblAccountDTO;
+import longpt.tblorder.TblOrderDAO;
+import longpt.tblorder.TblOrderDTO;
+import longpt.tblorderdetail.TblOrderDetailDAO;
+import longpt.tblorderdetail.TblOrderDetailDTO;
 import org.apache.log4j.Logger;
 
 /**
  *
  * @author phamt
  */
-@WebServlet(name = "ApplyCodeServlet", urlPatterns = {"/ApplyCodeServlet"})
-public class ApplyCodeServlet extends HttpServlet {
+@WebServlet(name = "TrackOrderServlet", urlPatterns = {"/TrackOrderServlet"})
+public class TrackOrderServlet extends HttpServlet {
 
-    private final String VIEW_CART_CONTROLLER = "ViewCart";
-    private final String CART_PAGE = "cartpage";
-    private final static Logger logger = Logger.getLogger(ApplyCodeServlet.class);
+    private String TRACKING_PAGE = "trackorderpage";
+    private final static Logger logger = Logger.getLogger(TrackOrderServlet.class);
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -47,35 +49,34 @@ public class ApplyCodeServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
 
-        String url = VIEW_CART_CONTROLLER;
+        String url = TRACKING_PAGE;
         try {
+            String orderId = request.getParameter("orderId");
+            //Get username to track order
+            String username = null;
             HttpSession session = request.getSession(false);
             if (session != null) {
-                String disCode = request.getParameter("txtDiscount");
-                int code = 0;
-                if (disCode == null || disCode.isEmpty()) {
-                    return;
-                } else {
-                    code = Integer.parseInt(disCode);
+                TblAccountDTO accountDTO = (TblAccountDTO) session.getAttribute("ACCOUNT");
+                if (accountDTO != null) {
+                    username = accountDTO.getUsername();
                 }
-                TblDiscountDAO discountDAO = new TblDiscountDAO();
-                int percent = discountDAO.getDisPercentById(code);
-                if (percent > 0) { //discount code is existed
-                    Cart cart = (Cart) session.getAttribute("CART");
-                    if (cart != null) {
-                        cart.setDiscountID(code);
-                        cart.setDiscountPer(percent);
-                        session.setAttribute("CART", cart);
-                    }
-                } else {
-                    request.setAttribute("USED_DISCOUNT", "This code doesn't exist!");
-                    url = CART_PAGE;
+                //Get Order by OrderId and Username
+                TblOrderDAO orderDAO = new TblOrderDAO();
+                TblOrderDTO orderDTO = orderDAO.getOrder(orderId, username);
+                request.setAttribute("ORDER_INFO", orderDTO);
+
+                if (orderDTO != null) {
+                    //Get order detail by OrderId
+                    TblOrderDetailDAO orderDetailDAO = new TblOrderDetailDAO();
+                    orderDetailDAO.loadOrderDetail(orderId);
+                    Map<TblOrderDetailDTO, String> orderDetailMap = orderDetailDAO.getListOrderDetail();
+                    request.setAttribute("ORDER_DETAIL_INFO", orderDetailMap);
                 }
             }
         } catch (SQLException ex) {
-            logger.error("ApplyCodeServlet - SQLException: " + ex.getMessage());
+            logger.error("TrackOrderServlet _ SQLException: " + ex.getMessage());
         } catch (NamingException ex) {
-            logger.error("ApplyCodeServlet - NamingException: " + ex.getMessage());
+            logger.error("TrackOrderServlet _ NamingException: " + ex.getMessage());
         } finally {
             ServletContext context = request.getServletContext();
             Map<String, String> listMap = (Map<String, String>) context.getAttribute("MAP");
