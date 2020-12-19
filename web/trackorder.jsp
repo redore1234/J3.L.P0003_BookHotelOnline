@@ -77,10 +77,6 @@
         <div class="container">
             <c:set var="orderHistory" value="${requestScope.ORDER_HISTORY}"/>
             <!-- Display order history -->
-            <div class="text-center" style="font-weight: bold">
-
-            </div>
-
             <c:if test="${not empty orderHistory}">
                 <table class="table table-hover">
                     <h3 class="text-center my-5" style="font-weight: bold"></h3>
@@ -124,60 +120,56 @@
             <c:set var="orderInfo" value="${requestScope.ORDER_INFO}" />
             <c:set var="orderDetailInfo" value="${requestScope.ORDER_DETAIL_INFO}" />
             <!-- TRACKING ORDER DETAIL AREA -->
-
-
-            <c:choose>
-                <c:when test="${not empty orderInfo}">
-                    <div class="text-center" style="font-weight: bold">
-                        <h3 class="my-3">TRACK ORDER DETAIL</h3>
-                    </div>
-                    <div class="card">
-                        <h5 class="card-header text-center" style="font-weight: bold">Order ID: ${orderInfo.orderId}</h5>
-                        <div class="card-body">
-                            <div>
-                                <span style="font-weight: bold">Name: </span> ${orderInfo.name}
-                            </div>
-                            <div>
-                                <span style="font-weight: bold">Address: </span> ${orderInfo.address}
-                            </div>
-                            <div>
-                                <span style="font-weight: bold">Phone: </span> ${orderInfo.phone}
-                            </div>
-                            <div>
-                                <span style="font-weight: bold">Booking Date: </span> ${orderInfo.bookDate}
-                            </div>
-                            <div>
-                                <span style="font-weight: bold">Discount Price: </span> ${orderInfo.discountPrice} VND
-                            </div>
+            <c:if test="${not empty orderInfo}">
+                <div class="text-center" style="font-weight: bold">
+                    <h3 class="my-3">TRACK ORDER DETAIL</h3>
+                </div>
+                <div class="card">
+                    <h5 class="card-header text-center" style="font-weight: bold">Order ID: ${orderInfo.orderId}</h5>
+                    <div class="card-body">
+                        <div>
+                            <span style="font-weight: bold">Name: </span> ${orderInfo.name}
+                        </div>
+                        <div>
+                            <span style="font-weight: bold">Address: </span> ${orderInfo.address}
+                        </div>
+                        <div>
+                            <span style="font-weight: bold">Phone: </span> ${orderInfo.phone}
+                        </div>
+                        <div>
+                            <span style="font-weight: bold">Booking Date: </span> ${orderInfo.bookDate}
+                        </div>
+                        <div>
+                            <span style="font-weight: bold">Discount Price: </span> ${orderInfo.discountPrice} VND
                         </div>
                     </div>
+                </div>
 
-                    <table class="table table-hover">
-                        <caption class="text-right" style="font-weight: bold">Total: ${orderInfo.totalPrice} VND</caption>
-                        <thead>
+                <table class="table table-hover">
+                    <caption class="text-right" style="font-weight: bold">Total: ${orderInfo.totalPrice} VND</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Room Type</th>
+                            <th scope="col">Price</th>
+                            <th scope="col">Check in Date</th>
+                            <th scope="col">Check out Date</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <c:forEach var="orderDetailInfo" items="${orderDetailInfo}" varStatus="counter">
                             <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Room Type</th>
-                                <th scope="col">Price</th>
-                                <th scope="col">Check in Date</th>
-                                <th scope="col">Check out Date</th>
+                                <th scope="row">${counter.count}</th>
+                                <td>${orderDetailInfo.value}</td>
+                                <td>${orderDetailInfo.key.totalPrice} VND</td>
+                                <td>${orderDetailInfo.key.checkinDate}</td>
+                                <td>${orderDetailInfo.key.checkoutDate}</td>
                             </tr>
-                        </thead>
-
-                        <tbody>
-                            <c:forEach var="orderDetailInfo" items="${orderDetailInfo}" varStatus="counter">
-                                <tr>
-                                    <th scope="row">${counter.count}</th>
-                                    <td>${orderDetailInfo.value}</td>
-                                    <td>${orderDetailInfo.key.totalPrice} VND</td>
-                                    <td>${orderDetailInfo.key.checkinDate}</td>
-                                    <td>${orderDetailInfo.key.checkoutDate}</td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
-                </c:when>
-            </c:choose>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </c:if>
         </div>
         <script src="assets/js/bootstrap.min.js"></script>
     </body>

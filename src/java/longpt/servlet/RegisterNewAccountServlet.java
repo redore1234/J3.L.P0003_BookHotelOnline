@@ -80,7 +80,7 @@ public class RegisterNewAccountServlet extends HttpServlet {
                 errors.setUsernameIsExisted("Username is existed. Please input another username!");
             }
         } catch (NamingException ex) {
-            logger.error("RegisterNewAccountServlet NamingException: " + ex.getMessage());
+            logger.error("RegisterNewAccountServlet _ NamingException: " + ex.getMessage());
         } finally {
             ServletContext context = request.getServletContext();
             Map<String, String> listMap = (Map<String, String>) context.getAttribute("MAP");

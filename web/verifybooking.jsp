@@ -80,7 +80,6 @@
                 <h2>Booking Verify</h2>
                 <!-- Confirm booking form -->
                 <form action="VerifyBooking" method="POST" class="form-group">
-                    
                     <label>Enter the 4 digits code sent to your email (${account.username})!</label>
                     <input type="text" name="txtActivationCode" value="" class="form-control"/><br/>
                     <input type="submit" value="Verify Booking" name="btnAction" class="btn btn-primary"/> <br/>
@@ -91,8 +90,7 @@
                 </form>
 
                 <!-- Resend code -->
-                <a href="SendVerifyCode?btnAction=Send Activation&txtCustomerName=${sessionScope.NAME_ACCOUNT}&txtAddress=${sessionScope.ADDRESS}&txtPhone=${sessionScope.PHONE}">Resend activation code</a> <br/>
-                <a href="cartpage">Back to cart</a>
+                <a href="SendVerifyCode?btnAction=Send Activation&txtCustomerName=${sessionScope.NAME_ACCOUNT}&txtAddress=${sessionScope.ADDRESS}&txtPhone=${sessionScope.PHONE}">Resend activation code</a>
             </div>
         </div>
     </div>

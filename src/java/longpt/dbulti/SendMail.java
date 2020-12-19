@@ -48,7 +48,7 @@ public class SendMail {
 	MimeMessage message = new MimeMessage(session);
 	message.setFrom(new InternetAddress(APP_EMAIL));
 	message.setRecipient(Message.RecipientType.TO, new InternetAddress(receiveEmail));
-	message.setSubject("Activate Your Order");
+	message.setSubject("Verify Your Booking Hotel");
 	message.setText("The activation code for your account is:" + code);
 
 	//send message

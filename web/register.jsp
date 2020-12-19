@@ -83,6 +83,7 @@
                         
                     <div class="text-center">
                         Want to login again?<a href="login"> Try again</a> <br/>
+                        Back to the <a href="Home">Home page?</a>
                     </div>
                 </div>
             </div>

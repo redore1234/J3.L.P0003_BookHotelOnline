@@ -82,7 +82,7 @@ public class CheckOutServlet extends HttpServlet {
                         }
 
                         if (checkin == null || checkout == null) {
-                            error.setCheckInCheckOutIsEmpty("Checkin, Checkout is empty");
+                            error.setCheckInCheckOutIsEmpty("Checkin and Checkout are empty");
                             foundErr = true;
                         } else {
                             long millis = System.currentTimeMillis();
@@ -129,6 +129,7 @@ public class CheckOutServlet extends HttpServlet {
                                 }
                             }
                         }
+                        
                         if (foundErr == true) {
                             request.setAttribute("CHECKOUT_ERROR", error);
                             url = CART_PAGE;

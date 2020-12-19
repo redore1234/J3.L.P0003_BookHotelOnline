@@ -136,7 +136,7 @@
                             <div class="container h-100">
                                 <div class="row h-100  justify-content-center">
                                     <div class="col-6 text-center">
-                                        <h2 class="text-danger">No room to search</h2>
+                                        <h2 class="text-danger">All rooms are unavailable</h2>
                                     </div>
                                 </div>
                             </div>

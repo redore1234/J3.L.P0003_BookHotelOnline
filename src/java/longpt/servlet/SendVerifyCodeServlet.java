@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
 public class SendVerifyCodeServlet extends HttpServlet {
 
     private final String VERIFY_BOOKING_PAGE = "verifybookingpage";
-    private Logger log = Logger.getLogger(SendVerifyCodeServlet.class);
+    private Logger logger = Logger.getLogger(SendVerifyCodeServlet.class);
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -70,14 +70,14 @@ public class SendVerifyCodeServlet extends HttpServlet {
                 //Generate random code with 4 digit
                 String code = generateRandomCode(4);
 
-                //put confirmation code to request scope
+                //put confirmation code to session scope
                 session.setAttribute("CONFIRMATION_CODE", code);
 
                 //send activation mail
                 SendMail.sendAccountActivationCode(code, username);
             }
         } catch (MessagingException ex) {
-            log.error("SendVerifyCodeServlet _ MessagingException: " + ex.getMessage());
+            logger.error("SendVerifyCodeServlet _ MessagingException: " + ex.getMessage());
         } finally {
             ServletContext context = request.getServletContext();
             Map<String, String> listMap = (Map<String, String>) context.getAttribute("MAP");
