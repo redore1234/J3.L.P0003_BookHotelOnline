@@ -81,50 +81,54 @@ public class CheckOutServlet extends HttpServlet {
                             checkout = item.get(roomId).getCheckoutDate();
                         }
 
-                        long millis = System.currentTimeMillis();
-                        java.sql.Date currentDate = new java.sql.Date(millis);
-
-                        //Change java.util to java.sql
-                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                        java.util.Date checkInDate = format.parse(checkin);
-                        java.sql.Date sqlCheckInDate = new java.sql.Date(checkInDate.getTime());
-
-                        java.util.Date checkOutDate = format.parse(checkout);
-                        java.sql.Date sqlCheckOutDate = new java.sql.Date(checkOutDate.getTime());
-
-                        if (sqlCheckInDate.after(sqlCheckOutDate)) {
-                            error.setCheckInAfterCheckOut("Checkin Date must before Checkout Date");
-                            foundErr = true;
-                        } else if (sqlCheckInDate.before(currentDate) || sqlCheckOutDate.before(currentDate)) {
-                            error.setCheckInCheckOutBeforeCurDate("Checkin Date and Checkout Date must after currentDate");
+                        if (checkin == null || checkout == null) {
+                            error.setCheckInCheckOutIsEmpty("Checkin, Checkout is empty");
                             foundErr = true;
                         } else {
-                            TblRoomDAO roomDAO = new TblRoomDAO();
-                            List<Integer> listRoomId = roomDAO.searchRoomUnavailable(sqlCheckInDate, sqlCheckOutDate);
-                            if (listRoomId != null) {
-                                boolean unvalidInCart = false;
-                                //Check trong cart có những roomId nào không hợp lệ
-                                for (Integer roomId : listRoomId) {
-                                    if (cart.getCompartment().containsKey(roomId)) {
-                                        unvalidInCart = true;
-                                    }
-                                }
-                                if (unvalidInCart) {
-                                    foundErr = true;
-                                    String errMsg = "These rooms are not available: ";
-                                    for (int i = 0; i < listRoomId.size(); i++) {
-                                        errMsg += listRoomId.get(i) + "";
+                            long millis = System.currentTimeMillis();
+                            java.sql.Date currentDate = new java.sql.Date(millis);
 
-                                        if (i != listRoomId.size() - 1) {
-                                            errMsg += ", ";
+                            //Change java.util to java.sql
+                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                            java.util.Date checkInDate = format.parse(checkin);
+                            java.sql.Date sqlCheckInDate = new java.sql.Date(checkInDate.getTime());
+
+                            java.util.Date checkOutDate = format.parse(checkout);
+                            java.sql.Date sqlCheckOutDate = new java.sql.Date(checkOutDate.getTime());
+
+                            if (sqlCheckInDate.after(sqlCheckOutDate)) {
+                                error.setCheckInAfterCheckOut("Checkin Date must before Checkout Date");
+                                foundErr = true;
+                            } else if (sqlCheckInDate.before(currentDate) || sqlCheckOutDate.before(currentDate)) {
+                                error.setCheckInCheckOutBeforeCurDate("Checkin Date and Checkout Date must after currentDate");
+                                foundErr = true;
+                            } else {
+                                TblRoomDAO roomDAO = new TblRoomDAO();
+                                List<Integer> listRoomId = roomDAO.searchRoomUnavailable(sqlCheckInDate, sqlCheckOutDate);
+                                if (listRoomId != null) {
+                                    boolean unvalidInCart = false;
+                                    //Check trong cart có những roomId nào không hợp lệ
+                                    for (Integer roomId : listRoomId) {
+                                        if (cart.getCompartment().containsKey(roomId)) {
+                                            unvalidInCart = true;
                                         }
-
                                     }
-                                    error.setRoomIdBooked(errMsg);
+                                    if (unvalidInCart) {
+                                        foundErr = true;
+                                        String errMsg = "These rooms are not available: ";
+                                        for (int i = 0; i < listRoomId.size(); i++) {
+                                            errMsg += listRoomId.get(i) + "";
+
+                                            if (i != listRoomId.size() - 1) {
+                                                errMsg += ", ";
+                                            }
+
+                                        }
+                                        error.setRoomIdBooked(errMsg);
+                                    }
                                 }
                             }
                         }
-
                         if (foundErr == true) {
                             request.setAttribute("CHECKOUT_ERROR", error);
                             url = CART_PAGE;

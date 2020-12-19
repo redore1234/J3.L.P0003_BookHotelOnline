@@ -16,6 +16,7 @@ public class CheckOutError implements Serializable {
     private String checkInAfterCheckOut;
     private String checkInCheckOutBeforeCurDate;
     private String roomIdBooked;
+    private String checkInCheckOutIsEmpty;
 
     public CheckOutError() {
     }
@@ -42,6 +43,14 @@ public class CheckOutError implements Serializable {
 
     public void setRoomIdBooked(String roomIdBooked) {
         this.roomIdBooked = roomIdBooked;
+    }
+
+    public String getCheckInCheckOutIsEmpty() {
+        return checkInCheckOutIsEmpty;
+    }
+
+    public void setCheckInCheckOutIsEmpty(String checkInCheckOutIsEmpty) {
+        this.checkInCheckOutIsEmpty = checkInCheckOutIsEmpty;
     }
 
 }

@@ -161,10 +161,10 @@
                                             <input type="text" name="txtDiscount" value="${param.txtDiscount}" onkeypress=" return (event.charCode == 8 || event.charCode == 0) ? null : event.charCode >= 48 && event.charCode <= 57" 
                                                    title="Please input number" class="form-control" placeholder="Enter discount code"/>
                                             <button type="submit" name="btAction" value="Apply Code" class="btn btn-primary mt-2">Add discount</button>
-                                            <c:if test="${not empty requestScope.USED_DISCOUNT}">
-                                                <p class="text-danger text-bold">${requestScope.USED_DISCOUNT}</p>
-                                            </c:if>
                                         </form>
+                                        <c:if test="${not empty requestScope.USED_DISCOUNT}">
+                                            <p class="text-danger text-bold">${requestScope.USED_DISCOUNT}</p>
+                                        </c:if>
                                     </div>
                                     <div class="form-group ">
                                         <form action="ChooseDate" class="form-inline">
@@ -180,6 +180,9 @@
 
                                     <!-- CHECK OUT ERROR -->
                                     <c:set var="checkOutError" value="${requestScope.CHECKOUT_ERROR}"/>
+                                    <c:if test="${not empty checkOutError.checkInCheckOutIsEmpty}">
+                                        <p class="text-danger">  ${checkOutError.checkInCheckOutIsEmpty} </p>
+                                    </c:if>
                                     <c:if test="${not empty checkOutError.checkInAfterCheckOut}">
                                         <p class="text-danger">  ${checkOutError.checkInAfterCheckOut} </p>
                                     </c:if>
